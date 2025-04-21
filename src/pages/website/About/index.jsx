@@ -28,10 +28,10 @@ const AboutUsPage = ({ showTeam = true, showMilestones = true }) => {
       <VisionMissionGoalPage />
 
       {/* Optional: Team */}
-      <TeamPage showTeam={true} />
+      {/* <TeamPage showTeam={true} /> */}
 
       {/* Optional: Milestones */}
-      <MilestonePage showMilestones={true} />
+      {/* <MilestonePage showMilestones={true} /> */}
 
       <Divider className="my-12" />
 

@@ -46,7 +46,7 @@ const DashboardFooter = () => {
           <Divider />
           <Box className="text-center py-4">
             <Typography variant="body2" color="textSecondary">
-              © {new Date().getFullYear()} Scrapify Dashboard. All rights reserved.
+            &copy; {new Date().getFullYear()} Wasteology App. All rights reserved.
             </Typography>
           </Box>
         </>

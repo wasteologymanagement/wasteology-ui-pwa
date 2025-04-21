@@ -35,7 +35,17 @@ const StepTwoWasteSelection = ({ data, setData, onNext, onBack }) => {
       ? [...data.selectedWasteTypes, wasteId]
       : data.selectedWasteTypes.filter((id) => id !== wasteId);
 
-    setData({ ...data, selectedWasteTypes: updatedWasteTypes });
+    const updatedQuantities = { ...data.wasteQuantities };
+
+    if (!isChecked) {
+      updatedQuantities[wasteId] = 0; // Reset quantity if unchecked
+    }
+
+    setData({
+      ...data,
+      selectedWasteTypes: updatedWasteTypes,
+      wasteQuantities: updatedQuantities,
+    });
   };
 
   // 👇 Show loader while data is being fetched
@@ -48,7 +58,12 @@ const StepTwoWasteSelection = ({ data, setData, onNext, onBack }) => {
   }
 
   // Disable "Next" button if no waste types are selected
-  const isNextDisabled = data.selectedWasteTypes.length === 0;
+  const isNextDisabled =
+    data.selectedWasteTypes.length === 0 ||
+    data.selectedWasteTypes.some(
+      (wasteId) =>
+        !data.wasteQuantities[wasteId] || data.wasteQuantities[wasteId] < 1
+    );
 
   return (
     <div className="space-y-4">
@@ -113,6 +128,11 @@ const StepTwoWasteSelection = ({ data, setData, onNext, onBack }) => {
           Next
         </button>
       </div>
+      {/* 🟡 Note for user */}
+      <p className="text-sm text-yellow-600 mt-2">
+        ⚠️ Please note: For each selected waste type, you must choose a quantity
+        greater than 0.
+      </p>
     </div>
   );
 };

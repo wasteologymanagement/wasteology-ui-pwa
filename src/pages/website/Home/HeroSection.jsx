@@ -35,11 +35,12 @@ export default function HeroPage() {
             <p className="text-gray-600 text-base sm:text-lg leading-relaxed max-w-xl mx-auto">
               Wasteology makes recycling hassle-free by offering the best value
               for your scrap, all while ensuring responsible and sustainable
-              practices. ♻️💰🌱
+              practices.
+               {/* ♻️💰🌱 */}
             </p>
           </div>
 
-          <Link to="/scrap-rates" className="mt-4">
+          <Link to="/scrap-rates" className="mt-2">
             <Button
               variant="outlined"
               color="success"

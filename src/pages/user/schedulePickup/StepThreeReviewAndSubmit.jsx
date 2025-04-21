@@ -1,4 +1,5 @@
 import React from "react";
+import { formatToDMY } from "../../../utils/dateFormatter";
 
 const StepThreeReviewAndSubmit = ({ data, onSubmit, onBack }) => {
   const handleSubmit = () => {
@@ -45,7 +46,7 @@ const StepThreeReviewAndSubmit = ({ data, onSubmit, onBack }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-md">
           <div>
             <p className="text-gray-500">Pickup Date</p>
-            <p className="font-medium">{data.pickupDate}</p>
+            <p className="font-medium">{formatToDMY(data.pickupDate)}</p>
           </div>
           <div>
             <p className="text-gray-500">Pickup Time</p>

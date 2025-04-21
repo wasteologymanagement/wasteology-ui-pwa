@@ -33,7 +33,7 @@ const BookNowCTA = () => {
           address, and let us handle the rest!
         </Typography>
         <Button
-          onClick={handleOpenDialog}
+          // onClick={handleOpenDialog}
           variant="contained"
           size="large"
           className="!bg-green-700 hover:!bg-green-800 text-white px-6 py-3 text-base sm:text-lg shadow-none"

@@ -87,7 +87,7 @@ const WhyChooseUsPage = () => {
           sx={{
             borderRadius: 15
           }}
-          onClick={handleOpenDialog}
+          // onClick={handleOpenDialog}
         >
           Book Your Scrap Pickup Now
         </Button>

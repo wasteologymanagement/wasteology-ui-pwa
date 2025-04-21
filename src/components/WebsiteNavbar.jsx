@@ -14,7 +14,7 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import { Link, useLocation } from "react-router-dom";
-import logo from "../assets/logo/logo3.png";
+import logo from "../assets/logo/logo4.png";
 import QuickScrapPickupFormDialog from "./QuickScrapPickupFormDialog";
 
 const navLinks = [
@@ -59,7 +59,7 @@ const WebsiteNavbar = () => {
         elevation={0}
         sx={{
           // backgroundColor: "#ffffff",
-          py: 1,
+          // py: 1,
           px: { xs: 2, md: 4 },
           borderBottom: `1px solid ${softDivider}`,
         }}
@@ -81,17 +81,18 @@ const WebsiteNavbar = () => {
               display: "flex",
               alignItems: "center",
               textDecoration: "none",
-              gap: 2,
+              // gap: 2,
             }}
           >
             <img
               src={logo}
               alt="ScrapDeal Logo"
-              style={{
-                height: 80,
-                maxWidth: "300px",
-                objectFit: "contain",
-              }}
+              className="w-70"
+              // style={{
+              //   height: 80,
+              //   maxWidth: "400px",
+              //   // objectFit: "contain",
+              // }}
             />
             {/* <Divider
               orientation="vertical"
@@ -155,7 +156,7 @@ const WebsiteNavbar = () => {
                 px: 3,
                 "&:hover": { backgroundColor: "#005f58" },
               }}
-              onClick={handleOpenDialog}
+              // onClick={handleOpenDialog}
             >
               Book Now
             </Button>

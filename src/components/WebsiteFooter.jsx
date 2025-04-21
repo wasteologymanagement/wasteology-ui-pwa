@@ -4,8 +4,10 @@ import {
   FaTwitter,
   FaInstagram,
   FaLinkedinIn,
+  FaPinterest,
+  // FaThreads
 } from "react-icons/fa";
-import logo2 from "../assets/logo/logo3.png"
+import logo2 from "../assets/logo/logo4.png"
 
 const WebsiteFooter = () => (
   <footer
@@ -72,8 +74,8 @@ const WebsiteFooter = () => (
           <strong>Address:</strong> C2-043 Sobha City, Sector-108 Gurugram -
           122017
         </p>
-        <p className="text-sm leading-relaxed text-gray-300"><strong>Phone:</strong> +91 987654321</p>
-        <p className="text-sm leading-relaxed text-gray-300"><strong>Email:</strong> example@example.com</p>
+        <p className="text-sm leading-relaxed text-gray-300"><strong>Phone:</strong> +91 9289193001</p>
+        <p className="text-sm leading-relaxed text-gray-300"><strong>Email:</strong> wasteologymanagement@gmail.com</p>
       </div>
     </div>
 
@@ -87,10 +89,11 @@ const WebsiteFooter = () => (
       </p>
       <div className="flex gap-4 text-lg">
         {[
-          { icon: FaFacebookF, link: "https://facebook.com" },
-          { icon: FaTwitter, link: "https://twitter.com" },
-          { icon: FaInstagram, link: "https://instagram.com" },
-          { icon: FaLinkedinIn, link: "https://linkedin.com" },
+          { icon: FaFacebookF, link: "https://www.facebook.com/profile.php?id=61568282364849" },
+          { icon: FaTwitter, link: "https://x.com/wasteology01" },
+          { icon: FaInstagram, link: "https://www.instagram.com/wasteologymanagement/" },
+          { icon: FaPinterest, link: "https://in.pinterest.com/officialwasteology" },
+          // { icon: FaThreads, link: "https://www.threads.net/@officialwasteology" },
         ].map(({ icon: Icon, link }, idx) => (
           <a
             key={idx}

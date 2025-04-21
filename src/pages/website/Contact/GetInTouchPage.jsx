@@ -38,7 +38,7 @@ const GetInTouchPage = () => {
               Our Office
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Plot 42, Eco Park Lane, Sector 21, Gurugram, Haryana - 122016
+            C2-043, Sobha City, Sector-108, Gurugram - 122017
             </Typography>
           </Box>
         </Box>
@@ -51,7 +51,7 @@ const GetInTouchPage = () => {
               Call Us
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              +91 98765 43210
+              +91 9289193001
             </Typography>
           </Box>
         </Box>
@@ -64,7 +64,7 @@ const GetInTouchPage = () => {
               Email Us
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              contact@greenscrap.in
+            wasteologymanagement@gmail.com
             </Typography>
           </Box>
         </Box>

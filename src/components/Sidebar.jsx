@@ -11,7 +11,8 @@ import {
   MdLocalOffer,
   MdGroup,
 } from "react-icons/md";
-import logo3 from "../assets/logo/logo3.png"
+import logo from "../assets/logo/logo4.png"
+import short_logo from "../assets/logo/short_logo.png"
 
 const DashboardSidebar = ({ role = "admin", collapsed, setCollapsed }) => {
   const theme = useTheme();
@@ -46,20 +47,26 @@ const DashboardSidebar = ({ role = "admin", collapsed, setCollapsed }) => {
       collapsed={collapsed}
       breakPoint="md"
       backgroundColor="#ffffff"
-      className="h-full"
+      className="h-full shadow-2xl"
       rootStyles={{
         color: "#333",
-        borderRight: "1px solid #ddd",
+        borderRight: "0px solid #ddd",
       }}
     >
-      <Box className="text-center font-bold text-xl tracking-wide" sx={{
-        bgcolor: brandPrimary
+      <Box className="text-center font-bold text-xl h-22 tracking-wide" sx={{
+        bgcolor: brandPrimary,
+        border: '1px solid',
+        borderColor: brandPrimary
       }}>
-        <img
-          src={logo3} // Replace this with your actual path
+        {!collapsed ? <img
+          src={logo} // Replace this with your actual path
           alt="ScrapDeal Logo"
-          className="w-70 h-auto"
-        />
+          className="w-90 h-auto"
+        /> : <img
+        src={short_logo} // Replace this with your actual path
+        alt="ScrapDeal Logo"
+        className="w-18 h-auto"
+      />}
       </Box>
 
       <Menu className="p-1 mt-5">

@@ -11,6 +11,7 @@ const StepOnePickupDetails = ({ data, setData, onNext }) => {
     user?.userAddress || []
   );
   const [modalOpen, setModalOpen] = React.useState(false);
+  const brandPrimary = "#00756d";
 
   const handleAddAddress = (newAddr) => {
     setSavedAddresses([...savedAddresses, newAddr]);
