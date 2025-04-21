@@ -1,29 +1,21 @@
 import React, { useState, useEffect } from "react";
-import {
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Button,
-  CircularProgress,
-} from "@mui/material";
+import { Dialog, DialogContent } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { fetchScrapTypes } from "../service/apiServices/scrapTypeService";
 
 const initialForm = {
   pickupDate: "",
   pickupTime: "",
-  addressId: "",
-  address: [],
+  address: "",
   city: "",
   landmark: "",
   selectedWasteTypes: [],
   wasteQuantities: {},
-  wasteTypes: [],
   estimatedWeight: "",
   phoneNumber: "",
   userId: "",
-  email: "",
+  emailId: "",
   firstName: "",
   lastName: "",
 };
@@ -35,24 +27,39 @@ const QuickScrapPickupFormDialog = ({ open, onClose }) => {
   const [isServiceable, setIsServiceable] = useState(true);
   const [isCheckingPin, setIsCheckingPin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [isAlreadyRegistered, setIsAlreadyRegistered] = useState(false);
+  const [wasteTypes, setWasteTypes] = useState([]);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // useEffect(() => {
+  //   const loadScrapTypes = async () => {
+  //     try {
+  //       const types = await fetchScrapTypes();
+  //       setWasteTypes(types);
+  //     } catch (error) {
+  //       console.error("Failed to load scrap types:", error);
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+
+  //   loadScrapTypes();
+  // }, []);
+
+  // console.log("waste Types : ", wasteTypes)
 
   useEffect(() => {
     const checkPincode = async () => {
       if (pincode.length === 6) {
         setIsCheckingPin(true);
         const response = await fakeCheckPincodeAPI(pincode);
-        if (response.available) {
-          setIsServiceable(true);
-          setPinCheckMsg("✅ Service available in your area.");
-        } else {
-          setIsServiceable(false);
-          setPinCheckMsg("❌ Sorry, service is not available at this pincode.");
-        }
+        setIsServiceable(response.available);
+        setPinCheckMsg(
+          response.available
+            ? "✅ Service available in your area."
+            : "❌ Sorry, service is not available at this pincode."
+        );
         setIsCheckingPin(false);
       } else {
         setPinCheckMsg("");
@@ -77,6 +84,14 @@ const QuickScrapPickupFormDialog = ({ open, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isServiceable) return;
+    setIsLoading(true);
+    // Handle the submission logic
+    console.log("Submitted Data:", { ...formData, pincode });
+    setTimeout(() => {
+      setIsLoading(false);
+      onClose(); // Close on success
+    }, 1000);
   };
 
   const generateTimeOptions = (start, end, intervalMinutes) => {
@@ -94,13 +109,13 @@ const QuickScrapPickupFormDialog = ({ open, onClose }) => {
       const hour = startDate.getHours();
       const minute = startDate.getMinutes();
       const ampm = hour >= 12 ? "PM" : "AM";
+      const hour12 = hour % 12 === 0 ? 12 : hour % 12;
+      const label = `${hour12}:${minute.toString().padStart(2, "0")} ${ampm}`;
       const value = `${String(hour).padStart(2, "0")}:${String(minute).padStart(
         2,
         "0"
-      )} ${ampm}`;
-      const hour12 = hour % 12 === 0 ? 12 : hour % 12;
-      const label = `${hour12}:${minute.toString().padStart(2, "0")} ${ampm}`;
-      options.push({ value, label });
+      )}`;
+      options.push({ label, value });
       startDate.setMinutes(startDate.getMinutes() + intervalMinutes);
     }
 
@@ -112,24 +127,16 @@ const QuickScrapPickupFormDialog = ({ open, onClose }) => {
       open={open}
       onClose={onClose}
       PaperProps={{
-        sx: {
-          borderRadius: 4, // 4 = 32px; adjust as needed
-          p: 2,
-        },
+        sx: { borderRadius: 4, p: 5 },
       }}
     >
-      {/* <DialogTitle className="text-2xl font-semibold text-center  text-gray-800"> */}
-      <h2 className="text-2xl font-semibold text-center text-gray-800">
+      <h2 className="text-xl sm:text-2xl font-semibold text-center text-gray-800">
         Register for Scrap Pickup
       </h2>
-      {/* </DialogTitle> */}
 
-      <DialogContent className="space-y-4">
-        {/* Your dialog form fields or content here */}
-        <form
-          onSubmit={handleSubmit}
-          className="w-full max-w-lg mx-auto bg-white p-2 flex flex-col gap-4"
-        >
+      <DialogContent className="space-y-4 max-w-md w-full mx-auto p-1">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          {/* Name Inputs */}
           <div className="flex flex-col sm:flex-row gap-2">
             <input
               name="firstName"
@@ -137,7 +144,7 @@ const QuickScrapPickupFormDialog = ({ open, onClose }) => {
               value={formData.firstName}
               onChange={handleChange}
               required
-              className="w-full sm:w-1/2 border px-3 py-2 rounded-lg text-sm"
+              className="w-full border px-3 py-2 rounded-lg text-sm"
             />
             <input
               name="lastName"
@@ -145,10 +152,11 @@ const QuickScrapPickupFormDialog = ({ open, onClose }) => {
               value={formData.lastName}
               onChange={handleChange}
               required
-              className="w-full sm:w-1/2 border px-3 py-2 rounded-lg text-sm"
+              className="w-full border px-3 py-2 rounded-lg text-sm"
             />
           </div>
 
+          {/* Email */}
           <input
             name="emailId"
             type="email"
@@ -159,6 +167,7 @@ const QuickScrapPickupFormDialog = ({ open, onClose }) => {
             className="w-full border px-3 py-2 rounded-lg text-sm"
           />
 
+          {/* Phone */}
           <div className="w-full flex border rounded-lg overflow-hidden">
             <span className="px-3 py-2 bg-gray-100 text-sm flex items-center select-none">
               🇮🇳 +91
@@ -167,14 +176,15 @@ const QuickScrapPickupFormDialog = ({ open, onClose }) => {
               name="phoneNumber"
               type="tel"
               maxLength={10}
-              placeholder="Enter 10-digit number"
-              value={formData.phoneNumber || ""}
+              placeholder="10-digit number"
+              value={formData.phoneNumber}
               onChange={handleChange}
               required
               className="flex-1 px-3 py-2 text-sm outline-none"
             />
           </div>
 
+          {/* Address */}
           <textarea
             name="address"
             placeholder="Full Address"
@@ -185,31 +195,33 @@ const QuickScrapPickupFormDialog = ({ open, onClose }) => {
             rows={3}
           />
 
+          {/* Landmark */}
           <input
-            type="text"
-            placeholder="Near Lankmark "
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl bg-white text-sm"
+            name="landmark"
+            placeholder="Nearby Landmark"
             value={formData.landmark}
-            onChange={(e) => setData({ ...data, landmark: e.target.value })}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded-lg text-sm"
           />
 
+          {/* City and Pincode */}
           <div className="flex flex-col sm:flex-row gap-2">
             <select
               name="city"
               value={formData.city}
               onChange={handleChange}
               required
-              className="w-full sm:w-1/2 border px-3 py-2 rounded-lg text-sm bg-white"
+              className="w-full border px-3 py-2 rounded-lg text-sm bg-white"
             >
               <option value="">Select City</option>
               <option value="Delhi">Delhi</option>
               <option value="Gurgaon">Gurgaon</option>
             </select>
 
-            <div className="relative w-full sm:w-1/2">
+            <div className="relative w-full">
               <input
                 type="text"
-                name="postcode"
+                name="pincode"
                 maxLength="6"
                 value={pincode}
                 onChange={(e) => setPincode(e.target.value.replace(/\D/g, ""))}
@@ -219,26 +231,7 @@ const QuickScrapPickupFormDialog = ({ open, onClose }) => {
               />
               {isCheckingPin && (
                 <div className="absolute right-3 top-2.5">
-                  <svg
-                    className="animate-spin h-5 w-5 text-blue-600"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                    ></path>
-                  </svg>
+                  <div className="animate-spin h-5 w-5 border-t-2 border-blue-500 border-solid rounded-full"></div>
                 </div>
               )}
             </div>
@@ -246,7 +239,7 @@ const QuickScrapPickupFormDialog = ({ open, onClose }) => {
 
           {pinCheckMsg && (
             <p
-              className={`text-sm -mt-2 ${
+              className={`text-sm ${
                 isServiceable ? "text-green-600" : "text-red-600"
               }`}
             >
@@ -254,20 +247,23 @@ const QuickScrapPickupFormDialog = ({ open, onClose }) => {
             </p>
           )}
 
+          {/* Pickup date and time */}
           <div className="flex flex-col sm:flex-row gap-2">
             <input
               type="date"
+              name="pickupDate"
               min={new Date().toISOString().split("T")[0]}
               value={formData.pickupDate}
-              onChange={(e) => setData({ ...data, pickupDate: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm"
+              onChange={handleChange}
+              className="w-full border px-3 py-2 rounded-lg text-sm"
             />
             <select
+              name="pickupTime"
               value={formData.pickupTime}
-              onChange={(e) => setData({ ...data, pickupTime: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm"
+              onChange={handleChange}
+              className="w-full border px-3 py-2 rounded-lg text-sm"
             >
-              <option value="">Select a time</option>
+              <option value="">Select time</option>
               {generateTimeOptions("10:00", "17:00", 30).map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
@@ -276,61 +272,104 @@ const QuickScrapPickupFormDialog = ({ open, onClose }) => {
             </select>
           </div>
 
-          <button
-            type="submit"
-            className="bg-green-600 text-white font-medium py-2 rounded-lg hover:bg-green-700 transition duration-200 disabled:bg-gray-400"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <div className="flex justify-center items-center">
-                <svg
-                  className="animate-spin h-5 w-5 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                  ></path>
-                </svg>
-              </div>
-            ) : (
-              "Submit"
-            )}
-          </button>
+          {/* Waste Types */}
+          <div>
+            <label className="text-sm font-bold mb-2 block">
+              Select Scrap Types
+            </label>
+            <div className="grid grid-cols-1 gap-2">
+              {[
+                "Ac",
+                "Paper",
+                "Metal",
+                "Glass",
+                "E-Waste",
+                "Plastic",
+                "Cardboard",
+                "Refrigerator",
+                "Washing machine",
+                "Car / inverter battery",
+                "Tv / lcd / led / tft / monitor / cpu",
+              ].map((type) => {
+                const quantity = formData.wasteQuantities[type] || 0;
+                const increment = () =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    selectedWasteTypes: [
+                      ...new Set([...prev.selectedWasteTypes, type]),
+                    ],
+                    wasteQuantities: {
+                      ...prev.wasteQuantities,
+                      [type]: quantity + 1,
+                    },
+                  }));
+
+                const decrement = () => {
+                  const newQuantity = Math.max(0, quantity - 1);
+                  const updatedTypes =
+                    newQuantity === 0
+                      ? formData.selectedWasteTypes.filter((t) => t !== type)
+                      : formData.selectedWasteTypes;
+                  setFormData((prev) => ({
+                    ...prev,
+                    selectedWasteTypes: updatedTypes,
+                    wasteQuantities: {
+                      ...prev.wasteQuantities,
+                      [type]: newQuantity,
+                    },
+                  }));
+                };
+
+                return (
+                  <div
+                    key={type}
+                    className="border rounded-lg p-1 flex justify-between items-center bg-gray-50"
+                  >
+                    <span className="text-sm font-medium">{type}</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={decrement}
+                        className="bg-red-500 text-white px-2 py-1 rounded disabled:opacity-50"
+                        disabled={quantity === 0}
+                      >
+                        −
+                      </button>
+                      <span className="min-w-[24px] text-center">
+                        {quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={increment}
+                        className="bg-green-500 text-white px-2 py-1 rounded"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-2">
+            <button
+              disabled={isLoading}
+              className="bg-gray-600 text-white py-2 rounded-lg font-medium hover:bg-gray-700 transition disabled:bg-gray-400 w-full"
+              onClick={onClose}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isLoading || !isServiceable}
+              className="bg-green-700 text-white py-2 rounded-lg font-medium hover:bg-green-800 transition disabled:bg-gray-400 w-full"
+            >
+              {isLoading ? "Submitting..." : "Submit"}
+            </button>
+          </div>
         </form>
       </DialogContent>
-
-      {/* <DialogActions className="flex gap-2 pt-4">
-        <Button
-          onClick={onClose}
-          color="primary"
-          disabled={isLoading}
-          className="rounded-full"
-        >
-          Close
-        </Button>
-        <Button
-          type="submit"
-          onClick={handleSubmit}
-          color="primary"
-          variant="contained"
-          disabled={isLoading}
-          className="rounded-full"
-        >
-          {isLoading ? "Submitting..." : "Submit"}
-        </Button>
-      </DialogActions> */}
     </Dialog>
   );
 };

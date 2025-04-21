@@ -32,7 +32,7 @@ const VisionMissionGoalPage = () => {
   return (
     <>
       
-      <Container maxWidth="lg" className="pb-24 px-4 sm:px-6 lg:px-8">
+      <Container maxWidth="lg" className="pb-10 mt-4 px-4 sm:px-6 lg:px-8">
         <Grid container spacing={6}>
           {visionData.map((item, idx) => (
             <Grid key={idx} item xs={12} md={4}>

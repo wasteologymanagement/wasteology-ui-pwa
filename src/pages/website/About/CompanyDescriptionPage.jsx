@@ -7,7 +7,7 @@ import Diversity3Icon from "@mui/icons-material/Diversity3";
 const CompanyDescriptionPage = () => {
   return (
     <>
-      <Container maxWidth="lg" className="py-20 px-4 sm:px-6 lg:px-8">
+      <Container maxWidth="lg" className="py-0 px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto">
           <div className="flex justify-center mb-4">
             <Diversity3Icon fontSize="large" className="text-green-600" />

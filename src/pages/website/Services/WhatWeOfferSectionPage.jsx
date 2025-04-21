@@ -37,9 +37,9 @@ const WhatWeOfferSection = () => {
   ];
 
   return (
-    <Box className="bg-gradient-to-b py-20 px-4 sm:px-6 lg:px-8">
+    <Box className="bg-gradient-to-b py-10 px-4 sm:px-6 lg:px-8">
       <Container maxWidth="lg">
-        <h2 className="text-4xl font-extrabold text-center text-green-800 mb-14">
+        <h2 className="text-4xl font-extrabold text-center text-green-800 mb-10">
           What We Offer
         </h2>
 

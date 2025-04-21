@@ -5,7 +5,7 @@ import backgroundImage from "../../../assets/Garbage_truck_arriving.png"; // Ens
 export default function HeroPage() {
   return (
     <section className="relative bg-gradient-to-b from-green-100 to-white min-h-[130] flex flex-col justify-center pb-0">
-      <div className="flex flex-col lg:flex-row w-full max-w-7xl mx-auto px-4 lg:px-8 pt-10 md:pt-20">
+      <div className="flex flex-col lg:flex-row w-full max-w-7xl mx-auto px-4 lg:px-8 pt-5 md:pt-15">
         {/* Left Side: Image */}
         <Box className="lg:w-1/2 w-full flex justify-center items-center mb-6 lg:mb-0">
           <img

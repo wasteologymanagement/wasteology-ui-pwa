@@ -15,7 +15,7 @@ const BookNowCTA = () => {
   };
 
   return (
-    <Box className="bg-gray-100 rounded-[40px] px-6 py-10 mx-4 sm:mx-auto max-w-4xl text-center">
+    <Box className="bg-gray-100 rounded-[40px] px-6 py-10 mt-4 mx-4 sm:mx-auto max-w-4xl text-center">
       <Stack spacing={3} alignItems="center">
         <Typography
           variant="h5"

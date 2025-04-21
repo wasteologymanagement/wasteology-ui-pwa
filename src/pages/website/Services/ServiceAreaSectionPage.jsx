@@ -19,10 +19,10 @@ const cityData = [
 
 const ServiceAreaSection = () => {
   return (
-    <Box className="py-14 sm:py-20 bg-transparent">
+    <Box className="py-0 sm:py-5 bg-transparent">
       <Container maxWidth="md" className="px-4">
         <h2
-          className="text-green-800 font-extrabold text-3xl sm:text-4xl text-center mb-12 tracking-tight"
+          className="text-green-800 font-extrabold text-3xl sm:text-4xl text-center mb-8 tracking-tight"
           data-aos="fade-up"
         >
           Currently Serving

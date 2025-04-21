@@ -4,7 +4,7 @@ import recyclingTruckPickingImage from "../../../assets/ChatGPT_Image_2.png";
 
 const HeroPage = () => {
   return (
-    <Box className="bg-gradient-to-b from-green-100 to-white py-16 px-4 md:px-10">
+    <Box className="bg-gradient-to-b from-green-100 to-white py-0 px-4 md:px-10">
       <Box className="max-w-screen-xl mx-auto flex flex-col-reverse lg:flex-row items-center justify-between gap-12">
         {/* Text Content */}
         <Box className="w-full lg:w-1/2 text-center lg:text-left">

@@ -44,7 +44,7 @@ const HowItWorksSection = () => {
   ];
 
   return (
-    <Box className="py-20 px-4 bg-white">
+    <Box className="py-5 px-4 bg-white">
       <Container maxWidth="lg">
         <h2 className="text-3xl sm:text-4xl font-bold text-center text-green-800 mb-14">
           How It Works

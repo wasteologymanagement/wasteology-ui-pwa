@@ -3,7 +3,7 @@ import { Box, Container } from "@mui/material";
 
 const ServiceHeroSection = () => {
   return (
-    <Box className="bg-gradient-to-b from-green-100 via-green-50 to-white py-16 px-4 md:px-10">
+    <Box className="bg-gradient-to-b from-green-100 via-green-50 to-white py-5 px-4 md:px-10">
       <Container maxWidth="lg" className="text-center px-4">
         <h1 className="text-green-800 font-extrabold text-3xl sm:text-4xl md:text-5xl leading-tight mb-3">
           Our <span className="text-green-600">Services</span>

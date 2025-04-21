@@ -15,7 +15,7 @@ const ContactPage = () => {
   const isLargeScreen = useMediaQuery(theme.breakpoints.up("lg"));
 
   return (
-    <Box className="bg-gradient-to-b from-green-50 via-white to-green-100 py-12 px-4 sm:px-6 md:px-8">
+    <Box className="bg-gradient-to-b from-green-50 via-white to-green-100 py-5 px-4 sm:px-6 md:px-8">
       <Container maxWidth="lg">
         {/* Header */}
         <Box className="text-center mb-8 px-4 sm:px-6 lg:px-8">

@@ -8,6 +8,8 @@ import ServicePage from "../pages/website/Services/index";
 import ScrapeRatesPage from "../pages/website/ScrapRates";
 import ContactUsPage from "../pages/website/Contact";
 import UserRegistrationForm from "../components/UserRegistrationForm";
+import UserLoginPage from "../pages/auth/UserLoginPage";
+import AdminLoginPage from "../pages/auth/AdminLoginPage";
 
 const PublicRoutes = () => {
   return (
@@ -28,8 +30,13 @@ const PublicRoutes = () => {
         <Route path="contact" element={<ContactUsPage />} />
         <Route path="pricing" element={<ScrapeRatesPage />} />
         <Route path="signup" element={<UserRegistrationForm />} />
+        <Route
+          key="userLogin"
+          path="login/customer"
+          element={<UserLoginPage />}
+        />
+        <Route key="adminLogin" path="login/admin" element={<AdminLoginPage />} />
       </Route>
-      {/* <Route key='login' path="/login" element={<Login />} /> */}
     </Routes>
   );
 };

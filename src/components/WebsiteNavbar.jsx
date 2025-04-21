@@ -10,6 +10,8 @@ import {
   Button,
   Divider,
   Paper,
+  Menu,
+  MenuItem,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
@@ -29,9 +31,10 @@ const navLinks = [
 const WebsiteNavbar = () => {
   const isMobile = useMediaQuery("(max-width: 960px)");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeLink, setActiveLink] = useState('/');
+  const [activeLink, setActiveLink] = useState("/");
   const location = useLocation();
   const [openDialog, setOpenDialog] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const handleOpenDialog = () => {
     setOpenDialog(true);
@@ -94,11 +97,6 @@ const WebsiteNavbar = () => {
               //   // objectFit: "contain",
               // }}
             />
-            {/* <Divider
-              orientation="vertical"
-              flexItem
-              sx={{ borderColor: softDivider, height: 70 }}
-            /> */}
           </Box>
 
           {/* Center - Nav Links */}
@@ -111,7 +109,7 @@ const WebsiteNavbar = () => {
                   to={item.path}
                   sx={{
                     // color: brandPrimary,
-                    color: activeLink === item.path ? '#F7D54D' : "#ffffff",
+                    color: activeLink === item.path ? "#F7D54D" : "#ffffff",
                     textDecoration: "none",
                     fontWeight: 600,
                     fontSize: "1.2rem",
@@ -146,20 +144,66 @@ const WebsiteNavbar = () => {
               {menuOpen ? <CloseIcon /> : <MenuIcon />}
             </IconButton>
           ) : (
-            <Button
-              variant="contained"
-              sx={{
-                backgroundColor: brandPrimary,
-                borderRadius: 6,
-                textTransform: "none",
-                fontWeight: 600,
-                px: 3,
-                "&:hover": { backgroundColor: "#005f58" },
-              }}
-              // onClick={handleOpenDialog}
-            >
-              Book Now
-            </Button>
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+              <Button
+                variant="outlined"
+                sx={{
+                  backgroundColor: brandPrimary,
+                  color: brandContrast,
+                  borderColor: brandContrast,
+                  borderRadius: 6,
+                  textTransform: "none",
+                  fontWeight: 600,
+                  px: 3,
+                  "&:hover": { backgroundColor: "#005f58" },
+                }}
+                onClick={handleOpenDialog}
+              >
+                Book Now
+              </Button>
+
+              <Box>
+                <Button
+                  variant="outlined"
+                  sx={{
+                    color: brandContrast,
+                    borderColor: brandContrast,
+                    borderRadius: 6,
+                    textTransform: "none",
+                    fontWeight: 600,
+                    px: 2,
+                    "&:hover": {
+                      backgroundColor: "#005f58",
+                    },
+                  }}
+                  onClick={(e) => setAnchorEl(e.currentTarget)}
+                >
+                  Login
+                </Button>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={() => setAnchorEl(null)}
+                  anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                  transformOrigin={{ vertical: "top", horizontal: "right" }}
+                >
+                  <MenuItem
+                    component={Link}
+                    to="/login/customer"
+                    onClick={() => setAnchorEl(null)}
+                  >
+                    Customer Login
+                  </MenuItem>
+                  <MenuItem
+                    component={Link}
+                    to="/login/admin"
+                    onClick={() => setAnchorEl(null)}
+                  >
+                    Team Login
+                  </MenuItem>
+                </Menu>
+              </Box>
+            </Box>
           )}
         </Toolbar>
       </AppBar>
@@ -210,9 +254,11 @@ const WebsiteNavbar = () => {
             ))}
 
             {/* Book Now button on mobile */}
+            {/* Book Now button on mobile */}
             <Button
               variant="contained"
               size="medium"
+              onClick={handleOpenDialog}
               sx={{
                 borderRadius: "30px",
                 textTransform: "none",
@@ -223,11 +269,55 @@ const WebsiteNavbar = () => {
             >
               Book Now
             </Button>
+
+            {/* Login dropdown on mobile */}
+            <Box sx={{ mt: 1 }}>
+              <Typography
+                variant="subtitle1"
+                sx={{ fontWeight: 600, mb: 1, color: brandPrimary }}
+              >
+                Login
+              </Typography>
+              <Button
+                fullWidth
+                component={Link}
+                to="/login/customer"
+                onClick={toggleMenu}
+                variant="outlined"
+                sx={{
+                  mb: 1,
+                  textTransform: "none",
+                  borderColor: brandPrimary,
+                  color: brandPrimary,
+                  "&:hover": { borderColor: "#005f5a", color: "#005f5a" },
+                }}
+              >
+                Customer Login
+              </Button>
+              <Button
+                fullWidth
+                component={Link}
+                to="/login/admin"
+                onClick={toggleMenu}
+                variant="outlined"
+                sx={{
+                  textTransform: "none",
+                  borderColor: brandPrimary,
+                  color: brandPrimary,
+                  "&:hover": { borderColor: "#005f5a", color: "#005f5a" },
+                }}
+              >
+                Team Login
+              </Button>
+            </Box>
           </Box>
         </Paper>
       </Slide>
 
-      <QuickScrapPickupFormDialog open={openDialog} onClose={handleCloseDialog} />
+      <QuickScrapPickupFormDialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+      />
     </>
   );
 };
