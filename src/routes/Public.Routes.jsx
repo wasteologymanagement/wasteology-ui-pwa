@@ -10,6 +10,7 @@ import ContactUsPage from "../pages/website/Contact";
 import UserRegistrationForm from "../components/UserRegistrationForm";
 import UserLoginPage from "../pages/auth/UserLoginPage";
 import AdminLoginPage from "../pages/auth/AdminLoginPage";
+import FloatingWhatsApp from "../components/FloatingWhatsApp";
 
 const PublicRoutes = () => {
   return (
@@ -20,6 +21,8 @@ const PublicRoutes = () => {
         element={
           <WebsiteLayout>
             <WebsiteContents />
+            {/* Floating WhatsApp Button */}
+            <FloatingWhatsApp />
           </WebsiteLayout>
         }
       >
@@ -35,7 +38,11 @@ const PublicRoutes = () => {
           path="login/customer"
           element={<UserLoginPage />}
         />
-        <Route key="adminLogin" path="login/admin" element={<AdminLoginPage />} />
+        <Route
+          key="adminLogin"
+          path="login/admin"
+          element={<AdminLoginPage />}
+        />
       </Route>
     </Routes>
   );
