@@ -99,7 +99,7 @@ const StepThreeReviewAndSubmit = ({ data, onSubmit, onBack }) => {
       </section>
 
       {/* Buttons */}
-      <div className="flex flex-col sm:flex-row justify-between gap-4 pt-4 border-t pt-6">
+      <div className="flex flex-col sm:flex-row justify-between gap-4 pt-4 border-t">
         <button
           onClick={onBack}
           className="w-full sm:w-auto px-5 py-2 text-sm bg-gray-100 text-gray-800 font-medium rounded-xl hover:bg-gray-200 transition"
