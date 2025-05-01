@@ -78,7 +78,7 @@ const FloatingWhatsApp = () => {
           border: "1px solid rgba(0, 0, 0, 0.2)",
         }}
       >
-        Facing Problems?{"\n"}Call us at +91 {phoneNumber}
+        Facing Problems?{"\n"}Call us at +{phoneNumber}
       </Typography>
     </Box>
   );
