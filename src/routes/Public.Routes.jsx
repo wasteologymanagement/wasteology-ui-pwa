@@ -11,6 +11,7 @@ import UserRegistrationForm from "../components/UserRegistrationForm";
 import UserLoginPage from "../pages/auth/UserLoginPage";
 import AdminLoginPage from "../pages/auth/AdminLoginPage";
 import FloatingWhatsApp from "../components/FloatingWhatsApp";
+import GTM from "../service/GTM";
 
 const PublicRoutes = () => {
   return (
@@ -20,6 +21,7 @@ const PublicRoutes = () => {
         path="/"
         element={
           <WebsiteLayout>
+            <GTM />
             <WebsiteContents />
             {/* Floating WhatsApp Button */}
             <FloatingWhatsApp />
