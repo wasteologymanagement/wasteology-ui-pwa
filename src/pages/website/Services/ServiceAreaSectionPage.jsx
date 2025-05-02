@@ -15,6 +15,17 @@ const cityData = [
     icon: gurgaonIcon,
     description: "Available throughout Gurgaon, including tech parks and residential sectors.",
   },
+  {
+    name: "Noida",
+    icon: gurgaonIcon,
+    description: "Available throughout Noida, including industrial zones, residential sectors, and commercial hubs.",
+  },
+  {
+    name: "Faridabad",
+    icon: gurgaonIcon,
+    description: "Available throughout Faridabad, covering residential colonies, industrial areas, and marketplaces.",
+  }
+  
 ];
 
 const ServiceAreaSection = () => {
