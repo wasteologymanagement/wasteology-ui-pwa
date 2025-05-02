@@ -1,6 +1,6 @@
 {
-    "name": "Scrap Manager",
-    "short_name": "ScrapApp",
+    "name": "Wasteology",
+    "short_name": "Wasteology",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",
