@@ -1,16 +1,15 @@
 import React from "react";
 import { motion } from "framer-motion";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
-import { IconButton, Box, Typography } from "@mui/material";
+import { IconButton, Box, Typography, useMediaQuery } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 
 const FloatingWhatsApp = () => {
   const phoneNumber = "919289193001"; // Update with your real number
   const message = "Hello, I need some help!";
 
-  const isMobile =
-    /iPhone|Android|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleClick = () => {
     const baseUrl = isMobile
@@ -46,8 +45,8 @@ const FloatingWhatsApp = () => {
           sx={{
             backgroundColor: "#25D366",
             color: "#fff",
-            width: 60,
-            height: 60,
+            width: isMobile ? 45 : 60,
+            height: isMobile ? 45 : 60,
             boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.3)",
             borderRadius: "50%",
             "&:hover": {
@@ -55,31 +54,34 @@ const FloatingWhatsApp = () => {
             },
           }}
         >
-          <WhatsAppIcon sx={{ fontSize: 40 }} />
+          <WhatsAppIcon sx={{ fontSize: isMobile ? 28 : 40 }} />
         </IconButton>
       </motion.div>
 
-      <Typography
-        variant="body2"
-        sx={{
-          marginTop: 1,
-          color: "#000",
-          padding: "8px 14px",
-          borderRadius: "12px",
-          fontSize: "14px",
-          fontWeight: "bold",
-          width: "220px",
-          textAlign: "center",
-          whiteSpace: "pre-line",
-          background: "rgba(255, 255, 255, 0.6)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.15)",
-          border: "1px solid rgba(0, 0, 0, 0.2)",
-        }}
-      >
-        Facing Problems?{"\n"}Call us at +{phoneNumber}
-      </Typography>
+      {!isMobile && (
+        <Typography
+          variant="body2"
+          sx={{
+            mt: 1,
+            color: "#000",
+            px: 2,
+            py: 1,
+            borderRadius: "10px",
+            fontSize: isMobile ? "12px" : "14px",
+            fontWeight: "bold",
+            width: isMobile ? "160px" : "220px",
+            textAlign: "center",
+            whiteSpace: "pre-line",
+            background: "rgba(255, 255, 255, 0.6)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.15)",
+            border: "1px solid rgba(0, 0, 0, 0.2)",
+          }}
+        >
+          Facing Problems?{"\n"}Call us at +{phoneNumber}
+        </Typography>
+      )}
     </Box>
   );
 };

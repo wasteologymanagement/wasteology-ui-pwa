@@ -9,21 +9,21 @@ const visionData = [
     icon: <PublicIcon fontSize="large" className="text-green-600" />,
     title: "Vision",
     content:
-      "To become India’s most trusted waste management partner, helping create a greener, circular economy.",
+      "To be an expert and committed waste management company, we aim to create a sustainable environment by collecting all types of waste and recycling them, contributing to a better society for everyone.",
     gradient: "from-green-50 via-green-100 to-white",
   },
   {
     icon: <ExploreIcon fontSize="large" className="text-yellow-600" />,
     title: "Mission",
     content:
-      "To deliver certified EPR services and smart waste solutions, enabling manufacturers and communities to fulfill environmental responsibilities.",
+      "Our mission is to deliver EPR Service. Extended Producer Responsibility (EPR) is a crucial component of waste management, ensuring the responsible disposal of electronic devices that are no longer useful to consumers. At Wasteology, we provide EPR certification to manufacturers and producers of electronic items, helping them fulfill their compliance under the E-Waste Policy 2024..",
     gradient: "from-yellow-50 via-yellow-100 to-white",
   },
   {
     icon: <TrackChangesIcon fontSize="large" className="text-blue-600" />,
     title: "Goal",
     content:
-      "To scale our operations and impact — helping thousands more reduce, reuse, and recycle through sustainable tech.",
+      "To continually enhance our services and expand our reach, enabling more clients to achieve success and experience growth through our dedicated efforts.",
     gradient: "from-blue-50 via-blue-100 to-white",
   },
 ];

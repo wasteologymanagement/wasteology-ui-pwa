@@ -21,6 +21,7 @@ const CompanyDescriptionPage = () => {
             directed to the right facility. We bridge the gap between waste
             generators and recyclers — making it easy for households, societies,
             corporates, and industries to dispose of responsibly.
+            
           </p>
         </div>
       </Container>
