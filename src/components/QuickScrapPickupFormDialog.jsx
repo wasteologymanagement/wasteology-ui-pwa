@@ -127,14 +127,14 @@ const QuickScrapPickupFormDialog = ({ open, onClose }) => {
       open={open}
       onClose={onClose}
       PaperProps={{
-        sx: { borderRadius: 4, p: 5 },
+        sx: { borderRadius: 4, p: {sm: 1, md: 4, lg: 2}, width: 800 },
       }}
     >
       <h2 className="text-xl sm:text-2xl font-semibold text-center text-gray-800">
         Register for Scrap Pickup
       </h2>
 
-      <DialogContent className="space-y-4 max-w-md w-full mx-auto p-1">
+      <DialogContent className="space-y-4 max-w-lg w-full mx-auto p-1">
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {/* Name Inputs */}
           <div className="flex flex-col sm:flex-row gap-2">

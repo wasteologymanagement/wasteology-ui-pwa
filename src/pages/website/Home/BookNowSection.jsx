@@ -103,7 +103,7 @@ const BookNowPage = () => {
     <>
       <div className="bg-white flex items-center py-2 sm:py-12 md:py-8">
         <Container
-          maxWidth="lg"
+          maxWidth="md"
           className="bg-white rounded-2xl px-4 py-4 sm:px-8 sm:py-5 shadow-lg"
         >
           {step === 1 && (
@@ -116,7 +116,7 @@ const BookNowPage = () => {
                 Schedule pickup now!
               </h2>
               <Grid container spacing={3} justifyContent="center">
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid item xs={12} sm={6} md={4}>
                   <TextField
                     fullWidth
                     required

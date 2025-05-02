@@ -1,6 +1,21 @@
 import { MdInfoOutline, MdPhone } from "react-icons/md";
+import QuickScrapPickupFormDialog from "../../../components/QuickScrapPickupFormDialog";
+import { useState } from "react";
+import { Button } from "@mui/material";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 const ImportantNotesCard = () => {
+
+  const [openDialog, setOpenDialog] = useState(false);
+  
+    const handleOpenDialog = () => {
+      setOpenDialog(true);
+    };
+  
+    const handleCloseDialog = () => {
+      setOpenDialog(false);
+    };
+
   return (
     <div className="mx-4 sm:mx-auto max-w-3xl bg-yellow-50 border-2 border-dashed border-yellow-300 rounded-2xl p-4 sm:p-5 mb-10 transition-all duration-300">
       <div className="flex items-center justify-center mb-3">
@@ -44,6 +59,27 @@ const ImportantNotesCard = () => {
           </span>
         </li>
       </ul>
+
+      <div className="text-center mt-4">
+        {/* Book Now button on mobile */}
+        <Button
+          // onClick={handleOpenDialog}
+          variant="contained"
+          size="large"
+          className="!bg-green-700 hover:!bg-green-800 text-white px-6 py-3 text-base sm:text-lg shadow-none"
+          endIcon={<ArrowForwardIcon style={{ transform: "rotate(-45deg)" }} />}
+          sx={{
+            borderRadius: 25,
+          }}
+        >
+          Book a Pickup
+        </Button>
+      </div>
+
+      <QuickScrapPickupFormDialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+      />
     </div>
   );
 };
