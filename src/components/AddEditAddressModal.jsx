@@ -53,7 +53,7 @@ const AddAddressModal = ({ open, onClose, onAdd, mode = 'add', existingAddress =
 
   const fakeCheckPincodeAPI = async (pin) => {
     await new Promise((res) => setTimeout(res, 1000));
-    const available = /^11|12/.test(pin);
+    const available = /^11|12|20/.test(pin); // Only '11xxx' and '12xxx' and '20xxx' are serviceable
     return { available };
   };
 

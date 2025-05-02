@@ -73,7 +73,7 @@ const QuickScrapPickupFormDialog = ({ open, onClose }) => {
 
   const fakeCheckPincodeAPI = async (pin) => {
     await new Promise((res) => setTimeout(res, 1000));
-    const available = /^11|12/.test(pin); // Only '11xxx' and '12xxx' are serviceable
+    const available = /^11|12|20/.test(pin); // Only '11xxx' and '12xxx' and '20xxx' are serviceable
     return { available };
   };
 
@@ -216,6 +216,8 @@ const QuickScrapPickupFormDialog = ({ open, onClose }) => {
               <option value="">Select City</option>
               <option value="Delhi">Delhi</option>
               <option value="Gurgaon">Gurgaon</option>
+              <option value="Noida">Noida</option>
+              <option value="Faridabad">Faridabad</option>
             </select>
 
             <div className="relative w-full">
