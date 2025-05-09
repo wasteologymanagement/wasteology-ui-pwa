@@ -3,6 +3,7 @@ import QuickScrapPickupFormDialog from "../../../components/QuickScrapPickupForm
 import { useState } from "react";
 import { Button } from "@mui/material";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import CustomDialog from "../../../components/customeDialog";
 
 const ImportantNotesCard = () => {
 
@@ -63,7 +64,7 @@ const ImportantNotesCard = () => {
       <div className="text-center mt-4">
         {/* Book Now button on mobile */}
         <Button
-          // onClick={handleOpenDialog}
+          onClick={handleOpenDialog}
           variant="contained"
           size="large"
           className="!bg-green-700 hover:!bg-green-800 text-white px-6 py-3 text-base sm:text-lg shadow-none"
@@ -76,10 +77,12 @@ const ImportantNotesCard = () => {
         </Button>
       </div>
 
-      <QuickScrapPickupFormDialog
+      {/* <QuickScrapPickupFormDialog
         open={openDialog}
         onClose={handleCloseDialog}
-      />
+      /> */}
+
+      <CustomDialog open={openDialog} onClose={handleCloseDialog} />
     </div>
   );
 };

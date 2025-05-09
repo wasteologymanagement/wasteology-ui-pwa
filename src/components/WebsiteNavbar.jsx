@@ -19,6 +19,9 @@ import { Link, useLocation } from "react-router-dom";
 import logo from "../assets/logo/logo4.png";
 import QuickScrapPickupFormDialog from "./QuickScrapPickupFormDialog";
 import CustomDialog from "./customeDialog";
+import QuickBookDialog from "./QuickBook";
+import StepFormDialog from "./QuickBook/StepFormDialog";
+import PhoneCheckAndStepForm from "./QuickBook/PhoneCheckAndStepForm";
 
 const navLinks = [
   { label: "Home", path: "/" },
@@ -159,7 +162,7 @@ const WebsiteNavbar = () => {
                   px: 3,
                   "&:hover": { backgroundColor: "#005f58" },
                 }}
-                // onClick={handleOpenDialog}
+                onClick={handleOpenDialog}
               >
                 Book Now
               </Button>
@@ -191,14 +194,14 @@ const WebsiteNavbar = () => {
                 >
                   <MenuItem
                     component={Link}
-                    // to="/login/customer"
+                    to="/login/customer"
                     onClick={() => setAnchorEl(null)}
                   >
                     Customer Login
                   </MenuItem>
                   <MenuItem
                     component={Link}
-                    // to="/login/admin"
+                    to="/login/admin"
                     onClick={() => setAnchorEl(null)}
                   >
                     Team Login
@@ -210,13 +213,13 @@ const WebsiteNavbar = () => {
         </Toolbar>
       </AppBar>
       <div className="bg-gradient-to-b from-green-100 to-green-100">
-      <marquee>
+        <marquee>
           <div className="animate-marquee whitespace-nowrap text-green-700 font-bold text-lg">
             <span className="inline-block px-4">
-            🚛 Minimum pickup value must be Rs:250/-
+              🚛 Minimum pickup value must be Rs:250/-
             </span>
           </div>
-      </marquee>
+        </marquee>
       </div>
 
       {/* Mobile Slide-down Menu */}
@@ -265,7 +268,7 @@ const WebsiteNavbar = () => {
             ))}
 
             {/* Book Now button on mobile */}
-            {/* <Button
+            <Button
               variant="contained"
               size="medium"
               onClick={handleOpenDialog}
@@ -278,7 +281,7 @@ const WebsiteNavbar = () => {
               }}
             >
               Book Now
-            </Button> */}
+            </Button>
 
             {/* Login dropdown on mobile */}
             <Box sx={{ mt: 1 }}>
@@ -329,7 +332,12 @@ const WebsiteNavbar = () => {
         onClose={handleCloseDialog}
       /> */}
 
-      <CustomDialog open={openDialog} onClose={handleCloseDialog} />
+      {/* <CustomDialog open={openDialog} onClose={handleCloseDialog} /> */}
+
+      <QuickBookDialog open={openDialog} onClose={handleCloseDialog}>
+        {/* <StepFormDialog onClose={handleCloseDialog} /> */}
+        <PhoneCheckAndStepForm onClose={handleCloseDialog} />
+      </QuickBookDialog>
     </>
   );
 };

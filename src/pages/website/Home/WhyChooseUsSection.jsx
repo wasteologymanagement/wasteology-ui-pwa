@@ -8,6 +8,7 @@ import {
 } from "@mui/icons-material";
 import garbageCollectionImage from "../../../assets/waste-garbage-collecti.png";
 import QuickScrapPickupFormDialog from "../../../components/QuickScrapPickupFormDialog";
+import QuickBookDialog from "../../../components/QuickBook";
 
 const WhyChooseUsPage = () => {
   const [openDialog, setOpenDialog] = useState(false);
@@ -87,13 +88,14 @@ const WhyChooseUsPage = () => {
           sx={{
             borderRadius: 15
           }}
-          // onClick={handleOpenDialog}
+          onClick={handleOpenDialog}
         >
           Book Your Scrap Pickup Now
         </Button>
       </div>
 
-      <QuickScrapPickupFormDialog open={openDialog} onClose={handleCloseDialog} />
+      {/* <QuickScrapPickupFormDialog open={openDialog} onClose={handleCloseDialog} /> */}
+      <QuickBookDialog open={openDialog} onClose={handleCloseDialog}/>
     </section>
     
   );

@@ -91,7 +91,7 @@ const CustomDialog = ({ open, onClose, width = "max-w-2xl" }) => {
 
   const fakeCheckPincodeAPI = async (pin) => {
     await new Promise((res) => setTimeout(res, 1000));
-    const available = /^11|12/.test(pin);
+    const available = /^11|12|20/.test(pin);
     return { available };
   };
 
