@@ -2,6 +2,11 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import adminLoginPng from "../../assets/admin_login.png";
 import { Snackbar, Alert } from "@mui/material";
+import { useDispatch } from 'react-redux';
+import { loginAdminSuccess, loginSuccess } from '../../store/slice/userSlice'; // Admin login success action
+import { authenticateUser } from '../../service/apiServices/authService';
+import { loginApi } from '../../service/apiServices/loginService';
+import { saveTokens } from '../../utils/tokensUtils';
 
 const AdminLoginPage = () => {
   const [username, setUsername] = useState("");
@@ -10,33 +15,89 @@ const AdminLoginPage = () => {
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState("error");
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const handleLogin = () => {
+  const handleLogin = async (event) => {
+    event.preventDefault();
+  
     if (!username || !password) {
       setAlertMessage("Please enter both username and password");
       setAlertType("error");
       setOpenSnackbar(true);
       return;
     }
-
+  
     setLoading(true);
-    // Simulate authentication (replace with actual API call)
-    setTimeout(() => {
-      setLoading(false);
-      // Check for hardcoded credentials for demo
-      if (username === "admin" && password === "admin123") {
-        setAlertMessage("Login successful!");
-        setAlertType("success");
+  
+    try {
+      const loginResponse = await loginApi({ username, password });
+  
+      console.log("Login response:", loginResponse);
+  
+      if (!loginResponse) {
+        setAlertMessage("Login failed. Please try again.");
+        setAlertType("error");
         setOpenSnackbar(true);
-        navigate("/admin/dashboard"); // Redirect to admin dashboard
+        setLoading(false);
+        return;
+      }
+  
+      const response = await authenticateUser(password);
+  
+      console.log("Authentication response:", response);
+  
+      if (!response || !response.accessToken) {
+        setAlertMessage("Authentication failed. Please try again.");
+        setAlertType("error");
+        setOpenSnackbar(true);
+        setLoading(false);
+        return;
+      }
+  
+      saveTokens({
+        accessToken: response.accessToken,
+        refreshToken: response.refreshToken,
+      });
+  
+      // Verify if `userRole` is present
+      console.log("User role in loginResponse:", loginResponse.userRole);
+  
+      if (loginResponse.userRole === "admin") {
+        // Ensure we are sending the correct payload
+        dispatch(
+          loginSuccess({
+            role: loginResponse.userRole,
+            ...loginResponse,
+          })
+        );
+  
+        navigate("/app/admin/dashboard");
+      } else if (loginResponse.userRole === "wl-user") {
+        // Ensure we are sending the correct payload
+        dispatch(
+          loginSuccess({
+            role: "picker",
+            ...loginResponse,
+          })
+        );
+  
+        navigate("/app/picker/dashboard");
       } else {
-        setAlertMessage("Invalid username or password");
+        setAlertMessage("Unauthorized user role.");
         setAlertType("error");
         setOpenSnackbar(true);
       }
-    }, 1000);
+    } catch (error) {
+      console.error("Error during login:", error);
+      setAlertMessage("An error occurred. Please try again.");
+      setAlertType("error");
+      setOpenSnackbar(true);
+    } finally {
+      setLoading(false);
+    }
   };
+  
 
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);

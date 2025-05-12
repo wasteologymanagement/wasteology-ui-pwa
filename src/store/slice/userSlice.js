@@ -85,7 +85,7 @@ const userSlice = createSlice({
       state.isAuthenticated = true;
       state.status = "succeeded";
       state.isExistingUser = true;
-      state.isAdmin = false;
+      state.isAdmin = role === "admin";
     },
 
     // For admin/picker login
@@ -187,6 +187,7 @@ export const { loginSuccess, loginAdminSuccess, logout, clearUser } =
   userSlice.actions;
 
 // Selector helpers (optional)
+export const selectIsAuthenticated = (state) => state.user.isAuthenticated;
 export const selectUser = (state) => state.user.user;
 export const selectRole = (state) => state.user.role;
 export const selectIsAdmin = (state) => state.user.role === "admin";

@@ -20,25 +20,6 @@ import Unauthorized from "../pages/unauthorized/UnauthorisePage";
 import Loading from "../components/Loading";
 
 
-// 🚀 Handles redirect to dashboard or login
-// const RedirectToDashboard = ({ isAuthenticated, role }) => {
-//   if (!isAuthenticated) {
-//     if (role === "user") {
-//       return <Navigate to="/" replace />; // Go to public route for OTP login
-//     } else {
-//       return <Navigate to="/login" replace />; // Admin/client login
-//     }
-//   }
-
-//   const roleRouteMap = {
-//     admin: "/app/admin/dashboard",
-//     client: "/app/client/dashboard",
-//     user: "/app/user/dashboard",
-//   };
-
-//   return <Navigate to={roleRouteMap[role] || "/unauthorized"} replace />;
-// };
-
 const AppRoutes = () => {
   const { isAuthenticated, role } = useAuthGuard();
 
@@ -47,16 +28,6 @@ const AppRoutes = () => {
       <CssBaseline />
       <Suspense fallback={<Loading />}>
         <Routes>
-          {/* 🔀 Redirect root (/) based on auth & role */}
-          {/* <Route
-            path="/"
-            element={
-              <RedirectToDashboard
-                isAuthenticated={isAuthenticated}
-                role={role}
-              />
-            }
-          /> */}
 
           {/* 🌐 Public Website (phone/otp login & landing pages) */}
           <Route path="/*" element={<PublicRoutes />} />
@@ -81,7 +52,7 @@ const AppRoutes = () => {
               element={
                 <ProtectedRoute
                   isAuthenticated={isAuthenticated}
-                  allowedRoles={["client"]}
+                  allowedRoles={["picker"]}
                   userRole={role}
                 />
               }

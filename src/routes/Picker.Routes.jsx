@@ -5,7 +5,7 @@ import ClientDashboard from "../pages/picker/Client.Dashboard";
 const ClientRoutes = ({ isAuthenticated, role }) => {
   return (
     <Routes>
-      <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} allowedRoles={["client"]} userRole={role} />}>
+      <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} allowedRoles={["picker"]} userRole={role} />}>
         <Route key='clientDashboard' path="dashboard" element={<ClientDashboard />} />
       </Route>
     </Routes>
