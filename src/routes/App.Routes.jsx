@@ -86,7 +86,7 @@ const AppRoutes = () => {
                 />
               }
             >
-              <Route path="/app/client/*" element={<PickerRoutes />} />
+              <Route path="/app/picker/*" element={<PickerRoutes />} />
             </Route>
 
             {/* User Dashboard */}
