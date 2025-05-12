@@ -32,6 +32,7 @@ const DashboardSidebar = ({ role = "admin", collapsed, setCollapsed }) => {
     picker: [
       { label: "Dashboard", path: "/app/picker/dashboard", icon: <MdDashboard /> },
       { label: "Requests", path: "/app/picker/trash-list", icon: <MdAssignment /> },
+      { label: "Profile", path: "/app/picker/profile", icon: <MdPerson /> },
     ],
     user: [
       { label: "Dashboard", path: "/app/user/dashboard", icon: <MdDashboard /> },

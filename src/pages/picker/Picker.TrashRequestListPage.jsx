@@ -41,9 +41,9 @@ const TrashPickerRequestListPage = () => {
       headerName: "Pickup Date",
       flex: 1,
       valueGetter: (params) => {
-        const date = params.row?.pickupDate;
+        const date = params;
+        console.log("date :", params)
         if (!date) return "";
-
         try {
           return format(new Date(date), "dd/MM/yyyy");
         } catch (error) {
@@ -62,7 +62,9 @@ const TrashPickerRequestListPage = () => {
           variant="contained"
           size="small"
           onClick={() =>
-            navigate(`/app/picker/trash-details/${params.row.trashRequestId}`)
+            navigate(`/app/picker/trash-details/${params.row.trashRequestId}`,{
+                state: { rowData: params.row }
+              })
           }
         >
           View Details
@@ -87,7 +89,7 @@ const TrashPickerRequestListPage = () => {
   }, [user.userId]);
 
   return (
-    <Box className="p-4">
+    <Box className="p-4 mb-10">
       <Typography variant="h4" className="font-bold mb-4 text-gray-800">
         Trash Requests
       </Typography>
@@ -126,7 +128,9 @@ const TrashPickerRequestListPage = () => {
                 variant="outlined"
                 size="small"
                 onClick={() =>
-                  navigate(`/app/picker/trash-details/${row.trashRequestId}`)
+                    navigate(`/app/picker/trash-details/${row.trashRequestId}`,{
+                        state: { rowData: row }
+                      })
                 }
               >
                 Details

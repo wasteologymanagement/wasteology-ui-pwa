@@ -29,6 +29,7 @@
         "immer": "^10.1.1",
         "lucide-react": "^0.487.0",
         "react": "^19.0.0",
+        "react-countdown-circle-timer": "^3.2.1",
         "react-datepicker": "^8.3.0",
         "react-day-picker": "^9.6.6",
         "react-dom": "^19.0.0",
