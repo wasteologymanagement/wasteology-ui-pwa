@@ -15,6 +15,7 @@ import logo from "../assets/logo/logo3.png"
 import { useDispatch } from "react-redux";
 import { logout } from '../store/slice/userSlice';
 import { removeTokens } from '../utils/tokensUtils';
+import { useNavigate } from "react-router-dom";
 
 const DashboardTopbar = ({ collapsed, setCollapsed }) => {
   const theme = useTheme();
@@ -24,6 +25,7 @@ const DashboardTopbar = ({ collapsed, setCollapsed }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const brandPrimary = "#00756d";
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+   const navigate = useNavigate();
 
   const handleMenuOpen = (e) => setAnchorEl(e.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);

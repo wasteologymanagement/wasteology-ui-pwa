@@ -7,9 +7,10 @@ import {
   BottomNavigationAction,
   useMediaQuery,
 } from "@mui/material";
-import { Home, AccountCircle, Settings } from "@mui/icons-material";
+import { Home, AccountCircle, Settings, EventNote, MonetizationOn } from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const DashboardFooter = () => {
   const theme = useTheme();
@@ -17,13 +18,33 @@ const DashboardFooter = () => {
   const navigate = useNavigate();
   const [value, setValue] = React.useState(0);
 
+  const role = useSelector((state) => state.user.role);
+
+  const menuItems = {
+    user: [
+      { label: "Home", icon: <Home />, path: "/app/user/dashboard" },
+      { label: "Bookings", icon: <EventNote />, path: "/app/user/bookings" },
+      { label: "Schedule", icon: <Settings />, path: "/app/user/schedule" },
+      { label: "Price", icon: <MonetizationOn />, path: "/app/user/scrap-rates" },
+      { label: "Profile", icon: <AccountCircle />, path: "/app/user/profile" },
+    ],
+    picker: [
+      { label: "Home", icon: <Home />, path: "/app/picker/dashboard" },
+      { label: "Requests", icon: <EventNote />, path: "/app/picker/trash-list" },
+      { label: "Profile", icon: <AccountCircle />, path: "/app/picker/profile" },
+    ],
+    admin: [
+      { label: "Dashboard", icon: <Home />, path: "/app/admin/dashboard" },
+      { label: "Users", icon: <AccountCircle />, path: "/app/admin/users" },
+      { label: "Bookings", icon: <EventNote />, path: "/app/admin/bookings" },
+      { label: "Rates", icon: <MonetizationOn />, path: "/app/admin/rates" },
+      { label: "Settings", icon: <Settings />, path: "/app/admin/settings" },
+    ],
+  };
+
   const handleChange = (event, newValue) => {
     setValue(newValue);
-    if (newValue === 0) navigate("/app/user/dashboard");
-    else if (newValue === 1) navigate("/app/user/bookings");
-    else if (newValue === 2) navigate("/app/user/schedule");
-    else if (newValue === 3) navigate("/app/user/scrap-rates");
-    else if (newValue === 4) navigate("/app/user/profile");
+    navigate(menuItems[role][newValue].path);
   };
 
   return (
@@ -35,18 +56,16 @@ const DashboardFooter = () => {
           showLabels
           sx={{ position: "fixed", bottom: 0, left: 0, right: 0, borderTop: "1px solid #ddd", zIndex: 1300 }}
         >
-          <BottomNavigationAction label="Home" icon={<Home />} />
-          <BottomNavigationAction label="Bookings" icon={<AccountCircle />} />
-          <BottomNavigationAction label="Schedule" icon={<Settings />} />
-          <BottomNavigationAction label="Price" icon={<Settings />} />
-          <BottomNavigationAction label="Profile" icon={<AccountCircle />} />
+          {menuItems[role]?.map((item, index) => (
+            <BottomNavigationAction key={index} label={item.label} icon={item.icon} />
+          ))}
         </BottomNavigation>
       ) : (
         <>
           <Divider />
           <Box className="text-center py-4">
             <Typography variant="body2" color="textSecondary">
-            &copy; {new Date().getFullYear()} Wasteology App. All rights reserved.
+              &copy; {new Date().getFullYear()} Wasteology App. All rights reserved.
             </Typography>
           </Box>
         </>
