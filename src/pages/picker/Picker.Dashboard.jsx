@@ -37,7 +37,7 @@ import { RiInformationFill } from "react-icons/ri";
 
 const ClientDashboard = () => {
   return (
-    <div className="bg-gray-50 text-gray-800 min-h-screen p-6 md:p-10 transition-all mb-10">
+    <div className="bg-gray-50 text-gray-800 p-6 md:p-10 transition-all mb-10">
       {/* Welcome Section */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800">

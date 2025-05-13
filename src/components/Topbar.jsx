@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Menu as MenuIcon } from "lucide-react";
-import logo from "../assets/logo/logo3.png"
+import logo from "../assets/logo/logo4.png"
 import { useDispatch } from "react-redux";
 import { logout } from '../store/slice/userSlice';
 import { removeTokens } from '../utils/tokensUtils';
@@ -39,13 +39,13 @@ const DashboardTopbar = ({ collapsed, setCollapsed }) => {
 
   return (
     <Box
-      className="flex justify-between items-center p-4 shadow sticky top-0 z-10"
+      className="flex justify-between items-center p-1 md:p-4 shadow sticky top-0 z-10"
       sx={{ bgcolor: brandPrimary }}
     >
       <Box className="flex items-center space-x-4">
         {isMobile ? (
           <Typography variant="h6" color="white">
-            <img src={logo} alt="Logo" style={{ width: 240 }} />
+            <img src={logo} alt="Logo" style={{ width: 200 }} />
           </Typography>
         ) : (
           <IconButton onClick={() => setCollapsed(!collapsed)}>

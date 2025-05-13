@@ -34,11 +34,11 @@ const DashboardFooter = () => {
       { label: "Profile", icon: <AccountCircle />, path: "/app/picker/profile" },
     ],
     admin: [
-      { label: "Dashboard", icon: <Home />, path: "/app/admin/dashboard" },
-      { label: "Users", icon: <AccountCircle />, path: "/app/admin/users" },
-      { label: "Bookings", icon: <EventNote />, path: "/app/admin/bookings" },
+      { label: "Home", icon: <Home />, path: "/app/admin/dashboard" },
+      { label: "Requests", icon: <AccountCircle />, path: "/app/admin/trash-list" },
+      { label: "Pickers", icon: <EventNote />, path: "/app/admin/pickers-list" },
       { label: "Rates", icon: <MonetizationOn />, path: "/app/admin/rates" },
-      { label: "Settings", icon: <Settings />, path: "/app/admin/settings" },
+      // { label: "Settings", icon: <Settings />, path: "/app/admin/settings" },
     ],
   };
 
