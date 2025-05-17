@@ -70,10 +70,10 @@ const WebsiteFooter = () => (
       {/* Column 4 */}
       <div>
         <h3 className="text-xl font-bold mb-4 text-white">Get in Touch</h3>
-        <p className="text-sm leading-relaxed text-gray-300">          
+        {/* <p className="text-sm leading-relaxed text-gray-300">          
           <strong>Address:</strong> C2-043 Sobha City, Sector-108 Gurugram -
           122017
-        </p>
+        </p> */}
         <p className="text-sm leading-relaxed text-gray-300"><strong>Phone:</strong> +91 9289193001</p>
         <p className="text-sm leading-relaxed text-gray-300"><strong>Email:</strong> wasteologymanagement@gmail.com</p>
       </div>
