@@ -7,6 +7,7 @@ import AdminPricing from "../pages/admin/Admin.Pricing";
 import AdminTrashPicker from "../pages/admin/Admin.TrashPicker";
 import AdminTrashRequestDetails from "../pages/admin/Admin.TrashRequestDetails";
 import AdminTrashPickerClientList from "../pages/admin/Admin.TrashPickerClientList";
+import { ROLES } from "../utils/roleConstants";
 
 const AdminRoutes = ({ isAuthenticated, role }) => {
   return (
@@ -15,7 +16,7 @@ const AdminRoutes = ({ isAuthenticated, role }) => {
         element={
           <ProtectedRoute
             isAuthenticated={isAuthenticated}
-            allowedRoles={["admin"]}
+            allowedRoles={[ROLES.ADMIN]}
             userRole={role}
           />
         }

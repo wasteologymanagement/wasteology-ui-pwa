@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import AppRoutes from "./routes/App.Routes";
 import 'aos/dist/aos.css';
 import AOS from 'aos';
+import { ROLES } from "./utils/roleConstants";
 
 
 
@@ -12,7 +13,7 @@ const getUser = () => {
   return (
     JSON.parse(localStorage.getItem("user")) || {
       isAuthenticated: true,
-      role: "admin",
+      role: ROLES.ADMIN,
     }
   );
 };
@@ -20,7 +21,7 @@ const getUser = () => {
 function App() {
   const [theme, colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(true);
-  const { isAuthenticated } = getUser();
+  // const { isAuthenticated } = getUser();
   useEffect(() => {
     AOS.init({ duration: 800, once: true });
   }, []);

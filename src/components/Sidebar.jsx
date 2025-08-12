@@ -24,18 +24,18 @@ const DashboardSidebar = ({ role = "admin", collapsed, setCollapsed }) => {
 
   // Define menu items with icons
   const menuItems = {
-    admin: [
+    ADMIN: [
       { label: "Dashboard", path: "/app/admin/dashboard", icon: <MdDashboard /> },
       { label: "Trash Request", path: "/app/admin/trash-list", icon: <MdAssignment /> },
       { label: "Pickers", path: "/app/admin/pickers-list", icon: <MdGroup /> },
       { label: "Pricing", path: "/app/admin/rates", icon: <MdAssignment /> },
     ],
-    picker: [
+    PICKER: [
       { label: "Dashboard", path: "/app/picker/dashboard", icon: <MdDashboard /> },
       { label: "Requests", path: "/app/picker/trash-list", icon: <MdAssignment /> },
       { label: "Profile", path: "/app/picker/profile", icon: <MdPerson /> },
     ],
-    user: [
+    USER: [
       { label: "Dashboard", path: "/app/user/dashboard", icon: <MdDashboard /> },
       { label: "My Pickups", path: "/app/user/bookings", icon: <MdAssignment /> },
       { label: "Schedule", path: "/app/user/schedule", icon: <MdSchedule /> },

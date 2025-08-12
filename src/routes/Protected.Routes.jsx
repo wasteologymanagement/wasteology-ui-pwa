@@ -7,9 +7,11 @@ const ProtectedRoute = ({ allowedRoles }) => {
 
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const userRole = useSelector(selectRole);
-  console.log("ProtectedRoute - isAuthenticated:", isAuthenticated);
-  console.log("ProtectedRoute - allowedRoles:", allowedRoles);
-  console.log("ProtectedRoute - userRole:", userRole);
+  // const isAuthenticated = true;
+  // const userRole = "user";
+  // console.log("ProtectedRoute - isAuthenticated:", isAuthenticated);
+  // console.log("ProtectedRoute - allowedRoles:", allowedRoles);
+  // console.log("ProtectedRoute - userRole:", userRole);
   // console.log("useAuthGuard - isInitialized:", isInitialized);
   if (!isAuthenticated) {
     return <Navigate to="/" replace />;

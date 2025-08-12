@@ -18,10 +18,13 @@ import PublicRoutes from "./Public.Routes";
 import NotFound from "../pages/notfound/NotFoundPage";
 import Unauthorized from "../pages/unauthorized/UnauthorisePage";
 import Loading from "../components/Loading";
+import { ROLES } from "../utils/roleConstants";
 
 
 const AppRoutes = () => {
   const { isAuthenticated, role } = useAuthGuard();
+  // const isAuthenticated = true;
+  // const role = "user";
 
   return (
     <Router>
@@ -39,7 +42,7 @@ const AppRoutes = () => {
               element={
                 <ProtectedRoute
                   isAuthenticated={isAuthenticated}
-                  allowedRoles={["admin"]}
+                  allowedRoles={[ROLES.ADMIN]}
                   userRole={role}
                 />
               }
@@ -52,7 +55,7 @@ const AppRoutes = () => {
               element={
                 <ProtectedRoute
                   isAuthenticated={isAuthenticated}
-                  allowedRoles={["picker"]}
+                  allowedRoles={[ROLES.PICKER]}
                   userRole={role}
                 />
               }
@@ -65,7 +68,7 @@ const AppRoutes = () => {
               element={
                 <ProtectedRoute
                   isAuthenticated={isAuthenticated}
-                  allowedRoles={["user"]}
+                  allowedRoles={[ROLES.USER]}
                   userRole={role}
                 />
               }

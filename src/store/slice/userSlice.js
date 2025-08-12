@@ -6,6 +6,7 @@ import {
   deleteAddressApi,
   editAddressApi,
 } from "../../service/apiServices/addressService";
+import { ROLES } from "../../utils/roleConstants";
 
 // Thunk: Fetch user by phone number (OTP login)
 export const fetchUserByPhoneNumber = createAsyncThunk(
@@ -85,7 +86,7 @@ const userSlice = createSlice({
       state.isAuthenticated = true;
       state.status = "succeeded";
       state.isExistingUser = true;
-      state.isAdmin = role === "admin";
+      state.isAdmin = role === ROLES.ADMIN;
     },
 
     // For admin/picker login
@@ -96,7 +97,7 @@ const userSlice = createSlice({
       state.isAuthenticated = true;
       state.status = "succeeded";
       state.isExistingUser = null;
-      state.isAdmin = role === "admin"; // backward compat
+      state.isAdmin = role === ROLES.ADMIN; // backward compat
     },
 
     // Logout and clear everything
@@ -190,8 +191,8 @@ export const { loginSuccess, loginAdminSuccess, logout, clearUser } =
 export const selectIsAuthenticated = (state) => state.user.isAuthenticated;
 export const selectUser = (state) => state.user.user;
 export const selectRole = (state) => state.user.role;
-export const selectIsAdmin = (state) => state.user.role === "admin";
-export const selectIsPicker = (state) => state.user.role === "picker";
-export const selectIsUser = (state) => state.user.role === "user";
+export const selectIsAdmin = (state) => state.user.role === ROLES.ADMIN;
+export const selectIsPicker = (state) => state.user.role === ROLES.PICKER;
+export const selectIsUser = (state) => state.user.role === ROLES.USER;
 
 export default userSlice.reducer;

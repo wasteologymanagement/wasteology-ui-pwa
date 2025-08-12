@@ -3,9 +3,8 @@
 import axiosInstance from "../axiosInstance";
 import { AUTH_ENDPOINTS } from "./endpoints/apiEndpoints";
 
-export const authenticateUser = async (pass) => {
-  let password = "admin"
-  const response = await axiosInstance.post(AUTH_ENDPOINTS.GENERATE_TOKEN, {"password" : password});
+export const authenticateUser = async (obj) => {
+  const response = await axiosInstance.post(AUTH_ENDPOINTS.LOGIN, obj);
   const { access_token, refresh_token } = response.data;
 
   // Return the properties with names matching the Redux slice

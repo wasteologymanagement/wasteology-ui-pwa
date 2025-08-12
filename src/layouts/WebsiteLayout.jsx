@@ -3,7 +3,7 @@ import React from "react";
 import { Box, Container } from "@mui/material";
 import Navbar from "../components/WebsiteNavbar"; // or MobileNavToggle
 import WebsiteFooter from "../components/WebsiteFooter";
-import HomePage from "../pages/website/Home";
+// import HomePage from "../pages/website/Home";
 
 const WebsiteLayout = ({ children }) => {
   return (

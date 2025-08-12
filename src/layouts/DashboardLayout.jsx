@@ -4,7 +4,7 @@ import DashboardSidebar from "../components/Sidebar";
 import DashboardTopbar from "../components/Topbar";
 import DashboardFooter from "../components/Footer";
 
-const DashboardLayout = ({ role = "admin" }) => {
+const DashboardLayout = ({ role = "ADMIN" }) => {
   const [collapsed, setCollapsed] = useState(false);
 
   return (

@@ -19,21 +19,22 @@ const DashboardFooter = () => {
   const [value, setValue] = React.useState(0);
 
   const role = useSelector((state) => state.user.role);
+  // const role = "user";
 
   const menuItems = {
-    user: [
+    USER: [
       { label: "Home", icon: <Home />, path: "/app/user/dashboard" },
       { label: "Bookings", icon: <EventNote />, path: "/app/user/bookings" },
       { label: "Schedule", icon: <Settings />, path: "/app/user/schedule" },
       { label: "Price", icon: <MonetizationOn />, path: "/app/user/scrap-rates" },
       { label: "Profile", icon: <AccountCircle />, path: "/app/user/profile" },
     ],
-    picker: [
+    PICKER: [
       { label: "Home", icon: <Home />, path: "/app/picker/dashboard" },
       { label: "Requests", icon: <EventNote />, path: "/app/picker/trash-list" },
       { label: "Profile", icon: <AccountCircle />, path: "/app/picker/profile" },
     ],
-    admin: [
+    ADMIN: [
       { label: "Home", icon: <Home />, path: "/app/admin/dashboard" },
       { label: "Requests", icon: <AccountCircle />, path: "/app/admin/trash-list" },
       { label: "Pickers", icon: <EventNote />, path: "/app/admin/pickers-list" },

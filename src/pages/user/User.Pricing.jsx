@@ -1,10 +1,10 @@
 import React from 'react'
-import ScrapRatePage from '../website/ScrapRates'
+// import ScrapRatePage from '../website/ScrapRates'
 
 const PricingPage = () => {
   return (
     <div>
-      <ScrapRatePage />
+      {/* <ScrapRatePage /> */}
     </div>
   )
 }

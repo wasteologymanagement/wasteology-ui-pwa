@@ -43,7 +43,7 @@ import {
   submitTrashDetails,
   TrashDetailsAfterPickup,
 } from '../../service/apiServices/trashCollectionService';
-import { fetchCategories } from '../../service/apiServices/scrapRatesService';
+import { getAllTrashMaterials } from '../../service/apiServices/scrapRatesService';
 
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -72,9 +72,9 @@ const TrashRequestDetailPage = () => {
   useEffect(() => {
     const fetchTrashTypes = async () => {
       try {
-        const response = await fetchCategories();
+        const response = await getAllTrashMaterials();
         const data = response;
-        setTrashData(data); // Assuming the API returns an object with trash types as keys
+        // setTrashData(data); // Assuming the API returns an object with trash types as keys
         console.log('trashData : ', data);
         // setLoading(false);
       } catch (err) {

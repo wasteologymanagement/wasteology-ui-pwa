@@ -274,28 +274,30 @@ const ProfilePage = () => {
     // </div>
     <>
       <div className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition mb-10">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">
-          User Profile
-        </h3>
+        <h3 className="text-lg font-semibold text-gray-800 mb-4">User Profile</h3>
+
+        {/* User Info Section */}
         <div className="flex items-center space-x-6 mb-6">
           <div className="bg-gray-200 p-4 rounded-full">
             <MdPerson className="text-gray-700 text-4xl" />
           </div>
           <div>
             <p className="text-xl font-semibold text-gray-800">
-              {user.firstName} {user.lastName}
+              {(user?.firstName || "") + " " + (user?.lastName || "")}
             </p>
-            <p className="text-sm text-gray-600">Email: {user.emailId}</p>
-            <p className="text-sm text-gray-600">Phone: {user.mobileNumber}</p>
+            <p className="text-sm text-gray-600">
+              Email: {user?.emailId || "Not Available"}
+            </p>
+            <p className="text-sm text-gray-600">
+              Phone: {user?.mobileNumber || "Not Available"}
+            </p>
           </div>
         </div>
 
         {/* Addresses Section */}
         <div className="mt-6">
           <div className="flex items-center justify-between mb-3">
-            <h4 className="text-md font-semibold text-gray-700">
-              Saved Addresses
-            </h4>
+            <h4 className="text-md font-semibold text-gray-700">Saved Addresses</h4>
             <button
               className="bg-green-600 text-white text-sm px-4 py-2 rounded-full shadow hover:bg-green-700 transition"
               onClick={() => handleDialogOpen("add")}
@@ -305,24 +307,20 @@ const ProfilePage = () => {
           </div>
 
           <div className="space-y-4">
-            {user.userAddress.length === 0 ? (
-              <Typography className="text-gray-500 text-center mt-6">
-                No addresses saved yet.
-              </Typography>
-            ) : (
+            {user?.userAddress?.length > 0 ? (
               user.userAddress.map((addr, idx) => (
                 <div
-                  key={addr.id}
+                  key={addr.id || idx}
                   className="bg-gray-100 p-4 rounded-xl flex justify-between items-start"
                 >
                   <div className="flex items-start gap-3">
                     <MdLocationOn className="text-green-600 text-xl mt-1" />
                     <div>
                       <p className="text-sm font-medium text-gray-800">
-                        {addr.address}
+                        {addr?.address || "Address not available"}
                       </p>
                       <p className="text-xs text-gray-600">
-                        {addr.city} - {addr.pinCode}
+                        {addr?.city || "City"} - {addr?.pinCode || "PIN"}
                       </p>
                     </div>
                   </div>
@@ -342,10 +340,15 @@ const ProfilePage = () => {
                   </div>
                 </div>
               ))
+            ) : (
+              <p className="text-gray-500 text-center mt-6">
+                No addresses saved yet.
+              </p>
             )}
           </div>
         </div>
       </div>
+
       {/* Add Address Modal */}
       {/* {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">

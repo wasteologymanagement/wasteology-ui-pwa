@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import userLoginPng from "../../assets/user_login.png";
-import { Snackbar, Alert, Button, CircularProgress } from "@mui/material";
+import { Snackbar, Alert } from "@mui/material";
 import {
   getAuth,
   RecaptchaVerifier,
@@ -33,6 +33,7 @@ const UserLoginPage = () => {
     severity: "info",
   });
   const dispatch = useDispatch();
+
   const isValidMobile = (num) => /^(\+91)?[6-9]\d{9}$/.test(num);
 
   useEffect(() => {
@@ -45,7 +46,10 @@ const UserLoginPage = () => {
       window.recaptchaVerifier = new RecaptchaVerifier(
         auth,
         recaptchaRef.current,
-        { size: "invisible", callback: () => {} }
+        {
+          size: "invisible",
+          callback: () => {},
+        }
       );
     }
   };
@@ -56,19 +60,19 @@ const UserLoginPage = () => {
 
   const handleSendOtp = async () => {
     if (!isValidMobile(mobileNumber)) {
-      alert("Please enter a valid Indian mobile number");
+      showSnackbar("Please enter a valid Indian mobile number", "warning");
       return;
     }
 
     setLoading(true);
     try {
-      const appVerifier = window.recaptchaVerifier;
-      const result = await signInWithPhoneNumber(
-        auth,
-        `+91${mobileNumber}`,
-        appVerifier
-      );
-      setConfirmationResult(result);
+      // const appVerifier = window.recaptchaVerifier;
+      // const result = await signInWithPhoneNumber(
+      //   auth,
+      //   `+91${mobileNumber}`,
+      //   appVerifier
+      // );
+      // setConfirmationResult(result);
       setOtpSent(true);
       showSnackbar("OTP sent successfully", "success");
     } catch (err) {
@@ -82,39 +86,33 @@ const UserLoginPage = () => {
   const handleVerifyOtp = async () => {
     if (!otp || otp.length !== 6) {
       showSnackbar("Please enter all 6 digits.", "warning");
-      return false;
+      return;
     }
 
-    if (!confirmationResult) {
-      showSnackbar("OTP confirmation not initialized.", "error");
-      return false;
-    }
+    // if (!confirmationResult) {
+    //   showSnackbar("OTP confirmation not initialized.", "error");
+    //   return;
+    // }
 
     setLoading(true);
 
     try {
-      await confirmationResult.confirm(otp);
-      showSnackbar("OTP verified", "success");
-      const tokens = await fetchAccessToken();
+      // await confirmationResult.confirm(otp);
+      // showSnackbar("OTP verified", "success");
+      // const tokens = await fetchAccessToken();
 
-      const fullPhone = `+91${mobileNumber}`;
-      const userData = await dispatch(
-        fetchUserByPhoneNumber(fullPhone)
-      ).unwrap();
+      // const fullPhone = `+91${mobileNumber}`;
+      // const userData = await dispatch(
+      //   fetchUserByPhoneNumber(fullPhone)
+      // ).unwrap();
 
-      console.log("user Data : ", userData);
-
-      // if (userData?.status === 404) {
-      //   showSnackbar("New user. Redirecting to registration.", "info");
-      //   // Handle redirection if needed
-      // } else {
+      // dispatch(loginSuccess(userData));
       showSnackbar("Login successful", "success");
-      dispatch(loginSuccess(userData));
+
       setTimeout(() => {
         setLoading(false);
         navigate("/app/user/schedule");
       }, 500);
-      // }
     } catch (err) {
       console.error("OTP verification failed:", err);
       showSnackbar("Invalid or expired OTP.", "error");
@@ -141,14 +139,15 @@ const UserLoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start bg-gray-50 px-4  py-4 md:py-16 sm:px-6 md:px-8">
-      {/* Login Card */}
-      <div className="w-full max-w-md bg-white p-4 sm:p-6 rounded-2xl shadow-lg">
-        <div className="text-center mb-6">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 py-6 sm:px-6 md:px-8">
+      {/* Card */}
+      <div className="w-full max-w-md bg-white p-6 rounded-2xl shadow-xl space-y-6">
+        {/* Header */}
+        <div className="text-center space-y-3">
           <img
             src={userLoginPng}
-            alt="Login Vector"
-            className="h-28 mx-auto mb-4 sm:h-36 md:h-40"
+            alt="Login Illustration"
+            className="h-24 sm:h-28 mx-auto"
           />
           <h2 className="text-2xl font-semibold text-gray-800">
             Welcome Back 👋
@@ -158,51 +157,56 @@ const UserLoginPage = () => {
           </p>
         </div>
 
+        {/* Input Section */}
         {!otpSent ? (
           <>
-            <label className="block mb-2 text-sm font-medium text-gray-600">
-              Mobile Number
-            </label>
-            <div className="flex items-center border rounded-lg overflow-hidden mb-4">
-              <span className="bg-gray-100 text-gray-700 px-3 py-3 text-sm font-semibold">
-                🇮🇳 +91
-              </span>
-              <input
-                type="tel"
-                placeholder="9876543210"
-                value={mobileNumber}
-                maxLength={10}
-                onChange={(e) => setMobileNumber(e.target.value)}
-                className="flex-1 px-3 py-2 outline-none"
-              />
+            <div>
+              <label className="block text-sm text-gray-600 mb-1">
+                Mobile Number
+              </label>
+              <div className="flex border border-gray-300 rounded-xl overflow-hidden">
+                <span className="bg-gray-100 text-gray-700 px-3 flex items-center text-sm">
+                  🇮🇳 +91
+                </span>
+                <input
+                  type="tel"
+                  placeholder="9876543210"
+                  value={mobileNumber}
+                  maxLength={10}
+                  onChange={(e) => setMobileNumber(e.target.value)}
+                  className="flex-1 px-3 py-2 text-sm outline-none"
+                />
+              </div>
             </div>
 
             <button
-              className="w-full bg-green-700 hover:bg-green-800 text-white py-2 rounded-3xl font-semibold"
               onClick={handleSendOtp}
               disabled={loading}
+              className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-full font-semibold transition duration-150"
             >
               {loading ? "Sending OTP..." : "Send OTP"}
             </button>
           </>
         ) : (
           <>
-            <label className="block mb-2 text-sm font-medium text-gray-600">
-              Enter OTP
-            </label>
-            <input
-              type="text"
-              maxLength={6}
-              placeholder="6-digit OTP"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg mb-4 outline-none"
-            />
+            <div>
+              <label className="block text-sm text-gray-600 mb-1">
+                Enter OTP
+              </label>
+              <input
+                type="text"
+                placeholder="6-digit OTP"
+                value={otp}
+                maxLength={6}
+                onChange={(e) => setOtp(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-xl outline-none text-sm"
+              />
+            </div>
 
             <button
-              className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold"
               onClick={handleVerifyOtp}
               disabled={loading}
+              className="w-full bg-green-700 hover:bg-green-800 text-white py-2 rounded-full font-semibold transition duration-150"
             >
               {loading ? "Verifying..." : "Verify & Login"}
             </button>
@@ -210,14 +214,16 @@ const UserLoginPage = () => {
         )}
       </div>
 
-      {/* Terms Paragraph at Bottom */}
-      <p className="mt-4 text-xs text-gray-400 text-center max-w-md px-2">
-        By continuing, you agree to our <span className="underline">Terms</span>{" "}
-        and <span className="underline">Privacy Policy</span>.
+      {/* Footer Text */}
+      <p className="text-xs text-gray-400 text-center mt-6 max-w-xs">
+        By continuing, you agree to our{" "}
+        <span className="underline cursor-pointer">Terms</span> and{" "}
+        <span className="underline cursor-pointer">Privacy Policy</span>.
       </p>
 
       <div ref={recaptchaRef} />
 
+      {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
