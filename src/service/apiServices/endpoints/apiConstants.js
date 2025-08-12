@@ -54,9 +54,29 @@ export const TRASH_MATERIAL_API = {
   // Get all trash materials
   GET_ALL: `${API_BASE_URL}/trash-materials`,
 
+  //Get all active and not deleted
+  GET_ALL_ACTIVE_NOT_DELETED: `${API_BASE_URL}/trash-materials/get-active-not-deleted`,
+
+  //Get activate soft delete material
+  GET_ACTIVATE: (id) => `${API_BASE_URL}/trash-materials/${id}/activate`,
+
   // Create new trash material
   CREATE: `${API_BASE_URL}/trash-materials`,
 
   // Permanently delete trash material
   PERMANENT_DELETE: (id) => `${API_BASE_URL}/trash-materials/${id}/permanent`,
+};
+
+
+// 👑 Admin API Endpoints
+export const ADMIN_API = {
+
+  // 👤 All users (USER role)
+  GET_USERS: `${API_BASE_URL}/admin/users`, 
+  
+  // 🧹 Trash pickers (PICKER role)
+  GET_PICKERS: `${API_BASE_URL}/admin/pickers`, 
+
+  // 🧑‍💼 All (admins, users, pickers)
+  GET_ALL_USERS: `${API_BASE_URL}/admin/all`,  
 };

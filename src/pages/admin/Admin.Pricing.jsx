@@ -2,24 +2,44 @@ import React, { useEffect, useState, useMemo } from "react";
 import {
   Box, Typography, Button, Dialog, DialogTitle, DialogContent, DialogActions,
   TextField, MenuItem, Grid, useMediaQuery, useTheme, Stack, Alert,
-  CircularProgress, Card, CardContent, IconButton, Tooltip, Chip
+  CircularProgress, Card, CardContent, IconButton, Tooltip, Chip, Tabs, Tab
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
-import {
-  Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon,
-  Refresh as RefreshIcon, Search as SearchIcon
-} from "@mui/icons-material";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import SearchIcon from "@mui/icons-material/Search";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import RestoreIcon from "@mui/icons-material/Restore";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import BlockIcon from "@mui/icons-material/Block";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import BlockRoundedIcon from "@mui/icons-material/BlockRounded";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchTrashMaterialsThunk,
   createTrashMaterialThunk,
-  updateTrashMaterialThunk
+  updateTrashMaterialThunk,
+  softDeleteTrashMaterialThunk,
+  permanentDeleteTrashMaterialThunk,
+  clearMessage,
+  fetchActiveTrashMaterialsThunk
 } from "../../store/slice/trashMaterialSlice";
+import { ActionsColumn } from "../../components/ActionsColumn";
+import { useSnackbar } from "../../components/SnackbarProvider";
+import { activateSoftDeletedTrashMaterial } from "../../service/apiServices/scrapRatesService";
+import ConfirmationDialog from "../../components/ConfirmationDialog";
+
+
+
 
 const AdminPricing = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const dispatch = useDispatch();
+  const message = useSelector(state => state.trashMaterial.message);
+  const { showMessage } = useSnackbar();
 
   const { list, status, error } = useSelector((state) => state.trashMaterial);
 
@@ -28,34 +48,70 @@ const AdminPricing = () => {
   const [formData, setFormData] = useState({
     id: null,
     type: "",
-    title: "",
-    price: "",
-    perUnit: "",
-    imageDesc: "",
-    imageLink: ""
+    displayName: "",
+    pricePerUnit: "",
+    unit: "",
+    description: "",
+    imageUrl: ""
   });
   const [editMode, setEditMode] = useState(false);
 
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success", // 'success' | 'error' | 'warning' | 'info'
+  });
+  const [tab, setTab] = useState("ACTIVE");
+
+  const [confirmDialog, setConfirmDialog] = useState({
+    open: false,
+    action: null, // 'delete' | 'deactivate' | 'activate'
+    item: null
+  });
+
+
   useEffect(() => {
-    dispatch(fetchTrashMaterialsThunk());
-  }, [dispatch]);
+    if (message) {
+      alert(message);  // or use a Snackbar/toast
+      showMessage(message || "Cleared", "success");
+      dispatch(clearMessage());
+    }
+  }, [message, dispatch]);
+
+  useEffect(() => {
+    if (tab === "ALL" || tab === "INACTIVE") {
+      dispatch(fetchTrashMaterialsThunk());
+    } else {
+      dispatch(fetchActiveTrashMaterialsThunk());
+    }
+  }, [dispatch, tab]);
+
 
   const filteredList = useMemo(() => {
-    if (!searchQuery.trim()) return list;
+    let baseList = list;
+
+    if (tab === "INACTIVE") {
+      baseList = baseList.filter(item => item.active === false);
+    }
+
+    if (!searchQuery.trim()) return baseList;
+
     const q = searchQuery.toLowerCase();
-    return list.filter(item =>
-      item.title?.toLowerCase().includes(q) ||
+    return baseList.filter(item =>
+      item.displayName?.toLowerCase().includes(q) ||
       item.type?.toLowerCase().includes(q) ||
-      item.imageDesc?.toLowerCase().includes(q) ||
-      String(item.price)?.toLowerCase().includes(q) ||
-      item.perUnit?.toLowerCase().includes(q)
+      item.description?.toLowerCase().includes(q) ||
+      String(item.pricePerUnit)?.toLowerCase().includes(q) ||
+      item.unit?.toLowerCase().includes(q)
     );
-  }, [list, searchQuery]);
+  }, [list, searchQuery, tab]);
+
+
 
   const handleOpen = () => {
     setFormData({
-      id: null, type: "", title: "", price: "", perUnit: "",
-      imageDesc: "", imageLink: ""
+      id: null, type: "", displayName: "", pricePerUnit: "", unit: "",
+      description: "", imageUrl: ""
     });
     setEditMode(false);
     setOpen(true);
@@ -69,79 +125,185 @@ const AdminPricing = () => {
   };
 
   const handleFormSubmit = async () => {
-    const payload = { ...formData, price: parseFloat(formData.price) || 0 };
+    const { id, ...rest } = formData;
+    const payload = { ...rest, pricePerUnit: parseFloat(formData.pricePerUnit) || 0 };
 
-    if (editMode) {
-      await dispatch(updateTrashMaterialThunk(payload));
-    } else {
-      await dispatch(createTrashMaterialThunk(payload));
+    try {
+      if (editMode) {
+        const res = await dispatch(updateTrashMaterialThunk({ id, payload })).unwrap();
+        showMessage(res.message || "Updated successfully", "success");
+      } else {
+        const res = await dispatch(createTrashMaterialThunk(payload)).unwrap();
+        showMessage(res.message || "Created successfully", "success");
+      }
+      setOpen(false);
+    } catch (error) {
+      showMessage(error.message || "Operation failed", "error");
     }
-    setOpen(false);
   };
 
+
+
   const handleEditClick = (row) => {
+    console.log('edit data : ', row)
+
     setFormData(row);
     setEditMode(true);
     setOpen(true);
   };
 
-  const handleRefresh = () => {
-    dispatch(fetchTrashMaterialsThunk());
+  const handleSoftDelete = async (id) => {
+    try {
+      await dispatch(softDeleteTrashMaterialThunk(id)).unwrap();
+      showMessage("Item deleted successfully", "success");
+    } catch (error) {
+      showMessage(error.message || "Failed to delete item", "error");
+    }
   };
+
+
+  const handlePermanentDelete = async (id) => {
+    try {
+      await dispatch(permanentDeleteTrashMaterialThunk(id)).unwrap();
+      showMessage("Item permanently deleted", "success");
+    } catch (error) {
+      showMessage(error.message || "Failed to permanently delete", "error");
+    }
+  };
+
+  const handleActivate = async (id) => {
+    try {
+      const response = await dispatch(activateSoftDeletedTrashMaterial(id)).unwrap();
+      showMessage(response?.message || "Activated successfully", "success");
+    } catch (error) {
+      showMessage(error?.message || "Failed to activate", "error");
+    }
+  };
+
+  const handleTabChange = (event, newValue) => setTab(newValue);
+
+
+  const handleRefresh = () => {
+    if (tab === "ALL" || tab === "INACTIVE") {
+      dispatch(fetchTrashMaterialsThunk());
+    } else {
+      dispatch(fetchActiveTrashMaterialsThunk());
+    }
+  };
+
+
 
   const columns = [
     { field: "id", headerName: "ID", flex: 0.3, align: "center", headerAlign: "center" },
+    {
+      field: "active",
+      headerName: "Status",
+      flex: 0.6,
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params) => {
+        const active = params.value;
+
+        return (
+          <Tooltip title={active ? "This material is currently active" : "This material is inactive"}>
+            <Chip
+              icon={active ? <CheckCircleRoundedIcon /> : <BlockRoundedIcon />}
+              label={active ? "Active" : "Inactive"}
+              color={active ? "success" : "error"}
+              variant="outlined"
+              size="small"
+              sx={{
+                fontWeight: 500,
+                borderColor: active ? 'success.main' : '#FFA726',
+                color: active ? 'success.main' : '#FFA726',
+                '& .MuiChip-icon': {
+                  color: active ? 'success.main' : '#FFA726',
+                }
+              }}
+            />
+          </Tooltip>
+        );
+      }
+    },
     {
       field: "type", headerName: "Type", flex: 0.8, align: "center", headerAlign: "center",
       renderCell: (params) => (
         <Chip label={params.value?.replace(/_/g, " ")} color="primary" variant="outlined" size="small" />
       )
     },
-    { field: "title", headerName: "Title", flex: 1, align: "center", headerAlign: "center" },
+    { field: "displayName", headerName: "Title", flex: 1, align: "center", headerAlign: "center" },
     {
-      field: "price", headerName: "Price", flex: 0.5, align: "right", headerAlign: "right",
+      field: "pricePerUnit", headerName: "Price", flex: 0.5, align: "right", headerAlign: "right",
       renderCell: (params) => (
-        <Typography fontWeight="bold" color="primary">₹{params.value}</Typography>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            width: "100%",
+            fontWeight: "bold",
+            color: "primary.main"
+          }}
+        >
+          ₹{params.value}
+        </Box>
       )
     },
     {
-      field: "perUnit", headerName: "Per Unit", flex: 0.5, align: "center", headerAlign: "center",
+      field: "unit", headerName: "Per Unit", flex: 0.5, align: "center", headerAlign: "center",
       renderCell: (params) => (
         <Chip label={params.value} size="small" color="secondary" variant="outlined" />
       )
     },
+    // {
+    //   field: "imageDesc", headerName: "Description", flex: 1.5, align: "center", headerAlign: "center",
+    //   renderCell: (params) => (
+    //     <Tooltip title={params.value}>
+    //       <Typography noWrap>{params.value}</Typography>
+    //     </Tooltip>
+    //   )
+    // },
     {
-      field: "imageDesc", headerName: "Description", flex: 1.5, align: "center", headerAlign: "center",
+      field: "imageUrl", headerName: "Image", flex: 0.5, align: "center", headerAlign: "center",
       renderCell: (params) => (
-        <Tooltip title={params.value}>
-          <Typography noWrap>{params.value}</Typography>
-        </Tooltip>
+        <Box
+          component="img"
+          src={params.value}
+          alt="img"
+          sx={{
+            width: 50,
+            height: 50,
+            borderRadius: 1,
+            objectFit: "cover",
+            display: "block",
+            mx: "auto",  // horizontal center margin auto
+          }}
+        />
       )
     },
     {
-      field: "imageLink", headerName: "Image", flex: 0.5, align: "center", headerAlign: "center",
-      renderCell: (params) => (
-        <Box component="img" src={params.value} alt="img"
-          sx={{ width: 50, height: 50, borderRadius: 1, objectFit: "cover" }} />
-      )
+      field: "recyclable", headerName: "Recyclable", flex: 0.5, align: "center", headerAlign: "center",
+      renderCell: (params) => params.value ? <Chip label="Yes" color="success" /> : <Chip label="No" color="default" />
     },
     {
-      field: "actions", headerName: "Actions", flex: 0.5, align: "center", headerAlign: "center",
+      field: "actions",
+      headerName: "Actions",
+      flex: 0.5,
+      align: "center",
+      headerAlign: "center",
+      sortable: false,
+      filterable: false,
       renderCell: (params) => (
-        <Stack direction="row" spacing={1}>
-          <Tooltip title="Edit">
-            <IconButton size="small" color="primary" onClick={() => handleEditClick(params.row)}>
-              <EditIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Delete">
-            <IconButton size="small" color="error">
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Stack>
-      )
+        <ActionsColumn
+          params={params}
+          handleEditClick={handleEditClick}
+          handleSoftDelete={handleSoftDelete}
+          handlePermanentDelete={handlePermanentDelete}
+          handleActivate={handleActivate}
+        />
+      ),
     }
+
   ];
 
   if (status === "loading" && !list.length) {
@@ -154,6 +316,7 @@ const AdminPricing = () => {
 
   return (
     <Box p={{ xs: 2, md: 3 }} mb={{ xs: "50px", sm: 0 }}>
+
       <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" mb={3}>
         <Typography variant="h4" fontWeight="bold">Pricing Management</Typography>
         <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
@@ -171,33 +334,170 @@ const AdminPricing = () => {
 
       {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
 
+      <Tabs value={tab} onChange={handleTabChange} sx={{ mb: 2 }}>
+        <Tab label="Active" value="ACTIVE" />
+        <Tab label="Inactive" value="INACTIVE" />
+        <Tab label="All" value="ALL" />
+      </Tabs>
+
       {isMobile ? (
         <Stack spacing={2}>
           {filteredList.length ? filteredList.map(item => (
-            <Card key={item.id}>
-              <CardContent>
+            <Card key={item.id} elevation={3} sx={{ borderRadius: 2 }}>
+              <CardContent sx={{ p: 1 }}>
                 <Stack spacing={1}>
-                  <Typography variant="h6">{item.title}</Typography>
-                  <Chip label={item.type?.replace(/_/g, " ")} color="primary" size="small" />
-                  <Typography fontWeight="bold" color="primary">₹{item.price}</Typography>
-                  <Chip label={item.perUnit} size="small" color="secondary" />
-                  <Typography variant="body2" noWrap>{item.imageDesc}</Typography>
-                  <Stack direction="row" spacing={1} justifyContent="flex-end">
-                    <Button size="small" startIcon={<EditIcon />} onClick={() => handleEditClick(item)}>Edit</Button>
-                    <Button size="small" color="error" startIcon={<DeleteIcon />}>Delete</Button>
+
+                  {/* Top Bar: Status + Type */}
+                  <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Chip
+                      label={item.active ? "Active" : "Inactive"}
+                      color={item.active ? "success" : "default"}
+                      size="small"
+                      icon={item.active ? <CheckCircleIcon fontSize="small" /> : <BlockIcon fontSize="small" />}
+                      variant="outlined"
+                    />
+                    <Chip
+                      label={item.type?.replace(/_/g, " ")}
+                      color="primary"
+                      size="small"
+                      variant="filled"
+                    />
                   </Stack>
+
+                  {/* Image */}
+                  {item.imageUrl && (
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        width: '100%',
+                      }}
+                    >
+                      <Box
+                        component="img"
+                        src={item.imageUrl}
+                        alt={item.displayName}
+                        sx={{
+                          width: "50%",
+                          maxWidth: "80%",
+                          height: 120,
+                          objectFit: "contain",
+                          borderRadius: 2,
+                          // boxShadow: 1,
+                        }}
+                      />
+                    </Box>
+                  )}
+
+
+                  {/* Title */}
+                  <Typography variant="h6" fontWeight="bold" textAlign="center">
+                    {item.displayName}
+                  </Typography>
+
+                  {/* Price and Unit */}
+                  <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
+                    <Typography variant="body1" fontWeight="bold" color="primary.main">
+                      ₹{item.pricePerUnit}
+                    </Typography>
+                    <Chip label={item.unit} size="small" color="secondary" />
+                  </Stack>
+
+                  {/* Description */}
+                  {item.description && (
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      textAlign="center"
+                      sx={{ fontStyle: 'italic' }}
+                    >
+                      {item.description}
+                    </Typography>
+                  )}
+
+                  {/* Action Buttons */}
+                  <Stack direction="row" spacing={1} justifyContent="space-between">
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<EditIcon color="info" />}
+                      onClick={() => handleEditClick(item)}
+                      sx={{ flexGrow: 1, minWidth: 0 }}
+                    >
+                      Edit
+                    </Button>
+
+                    {item.active ? (
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        color="warning"
+                        startIcon={<BlockIcon color="warning" />}
+                        onClick={() =>
+                          setConfirmDialog({
+                            open: true,
+                            action: "deactivate",
+                            item
+                          })
+                        }
+                        sx={{ flexGrow: 1, minWidth: 0 }}
+                      >
+                        Deactive
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        color="success"
+                        startIcon={<RestoreIcon color="success" />}
+                        onClick={() =>
+                          setConfirmDialog({
+                            open: true,
+                            action: "activate",
+                            item
+                          })
+                        }
+                        sx={{ flexGrow: 1, minWidth: 0 }}
+                      >
+                        Active
+                      </Button>
+                    )}
+
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      color="error"
+                      startIcon={<DeleteForeverIcon color="error" />}
+                      onClick={() =>
+                        setConfirmDialog({
+                          open: true,
+                          action: "delete",
+                          item
+                        })
+                      }
+                      sx={{ flexGrow: 1, minWidth: 0 }}
+                    >
+                      Delete
+                    </Button>
+                  </Stack>
+
+
                 </Stack>
               </CardContent>
             </Card>
-          )) : <Typography textAlign="center">No items found</Typography>}
+          )) : (
+            <Typography textAlign="center">No items found</Typography>
+          )}
         </Stack>
-      ) : (
-        <DataGrid
-          rows={filteredList} columns={columns} loading={status === "loading"}
-          pageSizeOptions={[10, 25, 50]} disableRowSelectionOnClick
-          autoHeight
-        />
-      )}
+
+      )
+        : (
+          <DataGrid
+            rows={filteredList} columns={columns} loading={status === "loading"}
+            pageSizeOptions={[10, 25, 50]} disableRowSelectionOnClick
+            autoHeight
+          />
+        )}
 
       {/* Dialog */}
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
@@ -205,24 +505,37 @@ const AdminPricing = () => {
         <DialogContent>
           <Grid container spacing={2} mt={1}>
             <Grid item xs={12}>
-              <TextField name="title" label="Title" value={formData.title} onChange={handleInputChange} fullWidth required />
+              <TextField name="displayName" label="Title" value={formData.displayName} onChange={handleInputChange} fullWidth required />
             </Grid>
             <Grid item xs={6}>
-              <TextField name="price" label="Price" value={formData.price} onChange={handleInputChange} type="number" fullWidth required />
+              <TextField name="pricePerUnit" label="Price" value={formData.pricePerUnit} onChange={handleInputChange} type="number" fullWidth required />
             </Grid>
             <Grid item xs={6}>
-              <TextField name="perUnit" label="Per Unit" value={formData.perUnit} onChange={handleInputChange} fullWidth required />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField name="type" label="Type" value={formData.type} onChange={handleInputChange} select fullWidth required>
-                {["PLASTIC", "METAL", "GLASS"].map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
+              <TextField name="unit" label="Per Unit" value={formData.unit} onChange={handleInputChange} select fullWidth required >
+                {["KG",
+                  "LITER",
+                  "PC",
+                  "TON",
+                  "GRAM"].map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
               </TextField>
             </Grid>
             <Grid item xs={12}>
-              <TextField name="imageDesc" label="Description" value={formData.imageDesc} onChange={handleInputChange} fullWidth multiline rows={3} />
+              <TextField name="type" label="Type" value={formData.type} onChange={handleInputChange} select fullWidth required>
+                {["METAL",
+                  "GLASS",
+                  "PAPER",
+                  "PLASTIC",
+                  "ELECTRONIC_SCRAP",
+                  "OTHER_E_WASTE",
+                  "AC",
+                  "VEHICLE"].map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
+              </TextField>
             </Grid>
             <Grid item xs={12}>
-              <TextField name="imageLink" label="Image Link" value={formData.imageLink} onChange={handleInputChange} fullWidth />
+              <TextField name="description" label="Description" value={formData.description} onChange={handleInputChange} fullWidth multiline rows={3} />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField name="imageUrl" label="Image Link" value={formData.imageUrl} onChange={handleInputChange} fullWidth />
             </Grid>
           </Grid>
         </DialogContent>
@@ -233,6 +546,39 @@ const AdminPricing = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <ConfirmationDialog
+        open={confirmDialog.open}
+        title={
+          confirmDialog.action === "delete"
+            ? "Permanently Delete?"
+            : confirmDialog.action === "deactivate"
+              ? "Deactivate Item?"
+              : "Activate Item?"
+        }
+        description={`Are you sure you want to ${confirmDialog.action === "delete"
+            ? "permanently delete"
+            : confirmDialog.action === "deactivate"
+              ? "deactivate"
+              : "activate"
+          } "${confirmDialog.item?.displayName}"?`}
+        confirmText={
+          confirmDialog.action === "delete"
+            ? "Delete"
+            : confirmDialog.action === "deactivate"
+              ? "Deactivate"
+              : "Activate"
+        }
+        onConfirm={() => {
+          const { action, item } = confirmDialog;
+          if (action === "delete") handlePermanentDelete(item.id);
+          if (action === "deactivate") handleSoftDelete(item.id);
+          if (action === "activate") handleActivate(item.id);
+          setConfirmDialog({ open: false, action: null, item: null });
+        }}
+        onClose={() => setConfirmDialog({ open: false, action: null, item: null })}
+      />
+
     </Box>
   );
 };

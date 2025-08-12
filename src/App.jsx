@@ -5,8 +5,7 @@ import AppRoutes from "./routes/App.Routes";
 import 'aos/dist/aos.css';
 import AOS from 'aos';
 import { ROLES } from "./utils/roleConstants";
-
-
+import { SnackbarProvider } from "./components/SnackbarProvider"; // ✅ Import your provider
 
 // Simulate authentication state
 const getUser = () => {
@@ -21,7 +20,7 @@ const getUser = () => {
 function App() {
   const [theme, colorMode] = useMode();
   const [isSidebar, setIsSidebar] = useState(true);
-  // const { isAuthenticated } = getUser();
+
   useEffect(() => {
     AOS.init({ duration: 800, once: true });
   }, []);
@@ -30,9 +29,11 @@ function App() {
     <ColorModeContext.Provider value={colorMode}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <div className="app">
-          <AppRoutes isSidebar={isSidebar} setIsSidebar={setIsSidebar} />
-        </div>
+        <SnackbarProvider> {/* ✅ Wrap your app in SnackbarProvider */}
+          <div className="app">
+            <AppRoutes isSidebar={isSidebar} setIsSidebar={setIsSidebar} />
+          </div>
+        </SnackbarProvider>
       </ThemeProvider>
     </ColorModeContext.Provider>
   );

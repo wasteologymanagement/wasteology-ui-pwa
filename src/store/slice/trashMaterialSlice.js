@@ -121,6 +121,8 @@ import {
   updateTrashMaterial,
   softDeleteTrashMaterial,
   permanentDeleteTrashMaterial,
+  activateSoftDeletedTrashMaterial,
+  getAllActiveTrashMaterials
 } from "../../service/apiServices/scrapRatesService";
 
 // 📌 Fetch all trash materials
@@ -132,12 +134,21 @@ export const fetchTrashMaterialsThunk = createAsyncThunk(
   }
 );
 
+// 📌 Fetch all active trash materials
+export const fetchActiveTrashMaterialsThunk = createAsyncThunk(
+  "trashMaterial/fetchAllActive",
+  async () => {
+    const response = await getAllActiveTrashMaterials();
+    return response.data; // Using "data" from API response
+  }
+);
+
 // 📌 Get single trash material by ID
 export const fetchTrashMaterialByIdThunk = createAsyncThunk(
   "trashMaterial/fetchById",
   async (id) => {
     const response = await getTrashMaterialById(id);
-    return response;
+    return response.data;
   }
 );
 
@@ -146,7 +157,7 @@ export const createTrashMaterialThunk = createAsyncThunk(
   "trashMaterial/create",
   async (payload) => {
     const response = await createTrashMaterial(payload);
-    return response;
+    return response.data;
   }
 );
 
@@ -155,7 +166,7 @@ export const updateTrashMaterialThunk = createAsyncThunk(
   "trashMaterial/update",
   async ({ id, payload }) => {
     const response = await updateTrashMaterial(id, payload);
-    return response;
+    return response.data;
   }
 );
 
@@ -177,6 +188,14 @@ export const permanentDeleteTrashMaterialThunk = createAsyncThunk(
   }
 );
 
+export const activateTrashMaterialThunk = createAsyncThunk(
+  "trashMaterial/activate",
+  async (id) => {
+    const response = await activateSoftDeletedTrashMaterial(id); // 👈 your API function
+    return response.data; // must contain { message, data }
+  }
+);
+
 const trashMaterialSlice = createSlice({
   name: "trashMaterial",
   initialState: {
@@ -184,19 +203,47 @@ const trashMaterialSlice = createSlice({
     selected: null,
     status: "idle",
     error: null,
+    message: null,
   },
-  reducers: {},
+  reducers: {
+    clearMessage(state) {
+      state.message = null;
+    }
+  },
   extraReducers: (builder) => {
     builder
-      // Fetch all
+      // Fetch All
       .addCase(fetchTrashMaterialsThunk.pending, (state) => {
         state.status = "loading";
       })
       .addCase(fetchTrashMaterialsThunk.fulfilled, (state, action) => {
         state.status = "succeeded";
-        state.list = action.payload;
+
+        // Ensure all items have active: boolean (fallback to true if missing)
+        state.list = action.payload.map((item) => ({
+          ...item,
+          active: item.active ?? true,
+        }));
       })
       .addCase(fetchTrashMaterialsThunk.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+
+      // Fetch Active Only
+      .addCase(fetchActiveTrashMaterialsThunk.pending, (state) => {
+        state.status = "loading";
+      })
+      .addCase(fetchActiveTrashMaterialsThunk.fulfilled, (state, action) => {
+        state.status = "succeeded";
+
+        // Explicitly tag all as active
+        state.list = action.payload.map((item) => ({
+          ...item,
+          active: true,
+        }));
+      })
+      .addCase(fetchActiveTrashMaterialsThunk.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.error.message;
       })
@@ -208,28 +255,53 @@ const trashMaterialSlice = createSlice({
 
       // Create
       .addCase(createTrashMaterialThunk.fulfilled, (state, action) => {
-        state.list.push(action.payload);
+        const item = { ...action.payload, active: true };
+        state.list.push(item);
       })
 
       // Update
       .addCase(updateTrashMaterialThunk.fulfilled, (state, action) => {
-        const index = state.list.findIndex((item) => item.id === action.payload.id);
+        const updated = action.payload;
+        const index = state.list.findIndex((item) => item.id === updated.id);
         if (index !== -1) {
-          state.list[index] = action.payload;
+          state.list[index] = {
+            ...updated,
+            active: updated.active ?? state.list[index].active,
+          };
         }
       })
 
-      // Soft delete
+      // Soft Delete → mark item as inactive
       .addCase(softDeleteTrashMaterialThunk.fulfilled, (state, action) => {
-        state.list = state.list.filter((item) => item.id !== action.payload);
+        const id = action.payload;
+        const index = state.list.findIndex((item) => item.id === id);
+        if (index !== -1) {
+          state.list[index].active = false; // Mark inactive instead of removing
+        }
       })
 
-      // Permanent delete
+      // Permanent Delete → remove completely
       .addCase(permanentDeleteTrashMaterialThunk.fulfilled, (state, action) => {
-        state.list = state.list.filter((item) => item.id !== action.payload);
+        const id = action.payload;
+        state.list = state.list.filter((item) => item.id !== id);
+      })
+
+      // Activate soft-deleted item
+      .addCase(activateTrashMaterialThunk.fulfilled, (state, action) => {
+        const updatedItem = action.payload.data;
+        const index = state.list.findIndex(item => item.id === updatedItem.id);
+        if (index !== -1) {
+          state.list[index] = { ...updatedItem, active: true };
+        } else {
+          state.list.push({ ...updatedItem, active: true });
+        }
+        state.message = action.payload.message || "Item activated successfully";
       });
-  },
+  }
+
 });
+
+export const { clearMessage } = trashMaterialSlice.actions;
 
 export default trashMaterialSlice.reducer;
 

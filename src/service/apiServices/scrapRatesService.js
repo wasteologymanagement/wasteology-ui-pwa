@@ -30,6 +30,12 @@ export const getAllTrashMaterials = async () => {
   return response.data; // Expected to be { data: [...], message, ... }
 };
 
+// 📌 Get all active trash materials
+export const getAllActiveTrashMaterials = async () => {
+  const response = await axiosInstance.get(TRASH_MATERIAL_API.GET_ALL_ACTIVE_NOT_DELETED);
+  return response.data; // Expected to be { data: [...], message, ... }
+};
+
 // 📌 Get trash material by ID
 export const getTrashMaterialById = async (id) => {
   const response = await axiosInstance.get(TRASH_MATERIAL_API.GET_BY_ID(id));
@@ -57,5 +63,12 @@ export const softDeleteTrashMaterial = async (id) => {
 // 📌 Permanent delete trash material
 export const permanentDeleteTrashMaterial = async (id) => {
   const response = await axiosInstance.delete(TRASH_MATERIAL_API.PERMANENT_DELETE(id));
+  return response.data;
+};
+
+
+// 📌 Activate soft deleted trash material
+export const activateSoftDeletedTrashMaterial = async (id) => {
+  const response = await axiosInstance.put(TRASH_MATERIAL_API.GET_ACTIVATE(id));
   return response.data;
 };
