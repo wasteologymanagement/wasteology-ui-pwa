@@ -26,7 +26,7 @@ const DashboardSidebar = ({ role = "admin", collapsed, setCollapsed }) => {
   const menuItems = {
     ADMIN: [
       { label: "Dashboard", path: "/app/admin/dashboard", icon: <MdDashboard /> },
-      { label: "Trash Request", path: "/app/admin/trash-list", icon: <MdAssignment /> },
+      { label: "Trash Request", path: "/app/admin/trash-request", icon: <MdAssignment /> },
       { label: "Pickers", path: "/app/admin/pickers-list", icon: <MdGroup /> },
       { label: "Pricing", path: "/app/admin/rates", icon: <MdAssignment /> },
     ],

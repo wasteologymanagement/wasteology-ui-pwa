@@ -36,7 +36,7 @@ const DashboardFooter = () => {
     ],
     ADMIN: [
       { label: "Home", icon: <Home />, path: "/app/admin/dashboard" },
-      { label: "Requests", icon: <AccountCircle />, path: "/app/admin/trash-list" },
+      { label: "Requests", icon: <AccountCircle />, path: "/app/admin/trash-request" },
       { label: "Pickers", icon: <EventNote />, path: "/app/admin/pickers-list" },
       { label: "Rates", icon: <MonetizationOn />, path: "/app/admin/rates" },
       // { label: "Settings", icon: <Settings />, path: "/app/admin/settings" },

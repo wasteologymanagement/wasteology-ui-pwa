@@ -1,10 +1,10 @@
 import {
   Edit as EditIcon,
-  Delete as DeleteIcon,
   DeleteForever as DeleteForeverIcon,
   MoreVert as MoreVertIcon,
   Restore as RestoreIcon,
-  Block as BlockIcon
+  Block as BlockIcon,
+  PersonAdd as PersonAddIcon
 } from "@mui/icons-material";
 import {
   IconButton,
@@ -15,17 +15,17 @@ import {
   Tooltip,
 } from "@mui/material";
 import { useState } from "react";
-import ConfirmationDialog from "./ConfirmationDialog"; // your reusable dialog
+import ConfirmationDialog from "./ConfirmationDialog"; // reusable dialog
 
 export const ActionsColumn = ({
   params,
   handleEditClick,
   handleSoftDelete,
   handlePermanentDelete,
-  handleActivate, // 👈 add this prop
+  handleActivate,
 }) => {
   const [anchorEl, setAnchorEl] = useState(null);
-  const [dialogType, setDialogType] = useState(null); // 'soft', 'permanent', or 'activate'
+  const [dialogType, setDialogType] = useState(null);
 
   const open = Boolean(anchorEl);
 
@@ -33,18 +33,37 @@ export const ActionsColumn = ({
   const handleMenuClose = () => setAnchorEl(null);
 
   const handleConfirm = () => {
-    const { id } = params.row;
-    if (dialogType === "soft") {
-      handleSoftDelete(id);
-    } else if (dialogType === "permanent") {
-      handlePermanentDelete(id);
-    } else if (dialogType === "activate") {
-      handleActivate(id);
+    // List of possible ID field keys
+    const possibleIds = ['id', 'pickerId', 'userId'];
+
+    // Safely extract the first existing ID
+    const row = params.row;
+    const id = possibleIds.find((key) => row?.[key] !== undefined && row[key] !== null)
+      ? row[possibleIds.find((key) => row?.[key] !== undefined && row[key] !== null)]
+      : null;
+
+    if (!id) {
+      console.warn("No valid ID found in row:", row);
+      return;
     }
+
+    console.log("confirming:", row);
+
+    // Perform action based on dialogType
+    if (dialogType === "soft" && handleSoftDelete) {
+      handleSoftDelete(id);
+    } else if (dialogType === "permanent" && handlePermanentDelete) {
+      handlePermanentDelete(id);
+    } else if (dialogType === "activate" && handleActivate) {
+      handleActivate(id);
+    } 
+
     setDialogType(null);
   };
 
+
   const isInactive = params.row?.active === false;
+  const isRequested = params.row?.status === 'REQUESTED';
 
   return (
     <>
@@ -62,22 +81,24 @@ export const ActionsColumn = ({
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         transformOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        {!isInactive && [
+        {/* Edit option */}
+        {!isInactive && handleEditClick && (
           <MenuItem
-            key="edit"
             onClick={() => {
               handleEditClick(params.row);
               handleMenuClose();
             }}
           >
             <ListItemIcon>
-              <EditIcon fontSize="small" sx={{ color: '#2196f3' }}/>
+              <EditIcon fontSize="small" sx={{ color: '#2196f3' }} />
             </ListItemIcon>
             <ListItemText>Edit</ListItemText>
-          </MenuItem>,
+          </MenuItem>
+        )}
 
+        {/* Soft Delete option */}
+        {!isInactive && handleSoftDelete && (
           <MenuItem
-            key="soft-delete"
             onClick={() => {
               setDialogType("soft");
               handleMenuClose();
@@ -86,25 +107,27 @@ export const ActionsColumn = ({
             <ListItemIcon>
               <BlockIcon fontSize="small" sx={{ color: '#FFA726' }} />
             </ListItemIcon>
-            <ListItemText>Deactive</ListItemText>
-          </MenuItem>,
+            <ListItemText>Inactive</ListItemText>
+          </MenuItem>
+        )}
 
+        {/* Permanent Delete option */}
+        {!isInactive && handlePermanentDelete && (
           <MenuItem
-            key="permanent-delete"
             onClick={() => {
               setDialogType("permanent");
               handleMenuClose();
             }}
           >
             <ListItemIcon>
-              <DeleteForeverIcon fontSize="small" sx={{ color: "#e91e63" }}/>
+              <DeleteForeverIcon fontSize="small" sx={{ color: "#e91e63" }} />
             </ListItemIcon>
             <ListItemText>Delete</ListItemText>
-          </MenuItem>,
-        ]}
+          </MenuItem>
+        )}
 
-
-        {isInactive && (
+        {/* Activate option */}
+        {isInactive && handleActivate && (
           <MenuItem
             onClick={() => {
               setDialogType("activate");
@@ -112,12 +135,14 @@ export const ActionsColumn = ({
             }}
           >
             <ListItemIcon>
-              <RestoreIcon fontSize="small" sx={{ color: '#4caf50' }}/>
+              <RestoreIcon fontSize="small" sx={{ color: '#4caf50' }} />
             </ListItemIcon>
             <ListItemText>Active</ListItemText>
           </MenuItem>
         )}
       </Menu>
+
+      
 
       {/* Reusable Confirmation Dialog */}
       <ConfirmationDialog
@@ -129,23 +154,36 @@ export const ActionsColumn = ({
             ? "Deactivate Item"
             : dialogType === "permanent"
               ? "Permanently Delete Item"
-              : "Activate Item"
+              : dialogType === "activate"
+                ? "Activate Item"
+                : dialogType === "other"
+                  ? "other"
+                  : ""
         }
         description={
           dialogType === "soft"
             ? "Are you sure you want to deactivate this item? You can restore it later."
             : dialogType === "permanent"
               ? "This action cannot be undone. Are you sure you want to permanently delete this item?"
-              : "Are you sure you want to activate this item?"
+              : dialogType === "activate"
+                ? "Are you sure you want to activate this item?"
+                : dialogType === "other"
+                  ? "other infuture"
+                  : ""
         }
         confirmText={
           dialogType === "soft"
             ? "Deactivate"
             : dialogType === "permanent"
               ? "Delete"
-              : "Activate"
+              : dialogType === "activate"
+                ? "Activate"
+                : dialogType === "other"
+                  ? "Other"
+                  : "Confirm"
         }
       />
+
     </>
   );
 };

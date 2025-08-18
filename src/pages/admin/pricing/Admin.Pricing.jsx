@@ -25,11 +25,11 @@ import {
   permanentDeleteTrashMaterialThunk,
   clearMessage,
   fetchActiveTrashMaterialsThunk
-} from "../../store/slice/trashMaterialSlice";
-import { ActionsColumn } from "../../components/ActionsColumn";
-import { useSnackbar } from "../../components/SnackbarProvider";
-import { activateSoftDeletedTrashMaterial } from "../../service/apiServices/scrapRatesService";
-import ConfirmationDialog from "../../components/ConfirmationDialog";
+} from "../../../store/slice/trashMaterialSlice";
+import { ActionsColumn } from "../../../components/ActionsColumn";
+import { useSnackbar } from "../../../components/SnackbarProvider";
+import { activateSoftDeletedTrashMaterial } from "../../../service/apiServices/scrapRatesService";
+import ConfirmationDialog from "../../../components/ConfirmationDialog";
 
 
 
@@ -72,7 +72,6 @@ const AdminPricing = () => {
 
   useEffect(() => {
     if (message) {
-      alert(message);  // or use a Snackbar/toast
       showMessage(message || "Cleared", "success");
       dispatch(clearMessage());
     }

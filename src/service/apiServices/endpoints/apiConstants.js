@@ -78,5 +78,39 @@ export const ADMIN_API = {
   GET_PICKERS: `${API_BASE_URL}/admin/pickers`, 
 
   // 🧑‍💼 All (admins, users, pickers)
-  GET_ALL_USERS: `${API_BASE_URL}/admin/all`,  
+  GET_ALL_USERS: `${API_BASE_URL}/admin/all`, 
+
+  // 🧹 Get all Trash pickers
+  GET_ALL_TRASH_PICKER: `${API_BASE_URL}/admin/trash-pickers`,
+
+   // 🧹 Get Trash pickers by id
+  GET_PICKER_BY_ID: (id) => `${API_BASE_URL}/admin/trash-pickers/${id}`, 
+  
+  // 🧹 Update Trash pickers by id
+  UPDATE_PICKER_BY_ID: (id) => `${API_BASE_URL}/admin/trash-pickers/${id}`, 
+
+  // 🧹 Trash pickers registration
+  REGISTER_PICKER: `${API_BASE_URL}/admin/trash-pickers/register`, 
+
+   // 🧹 soft delete Trash pickers by id
+  SOFT_DELETE_PICKER_BY_ID: (id) => `${API_BASE_URL}/admin/trash-pickers/${id}/soft-delete`,
+
+   // 🧹 Permanently delete Trash pickers by id
+  PERMANENT_DELETE_PICKER_BY_ID: (id) => `${API_BASE_URL}/admin/trash-pickers/${id}/permanent-delete`,
+
+  //Get activate soft delete trash picker
+  GET_ACTIVATE_TRASH_PICKER: (id) => `${API_BASE_URL}/admin/trash-pickers/${id}/revoke`,
 };
+
+
+// 👤 User Trash request API Endpoints
+export const TRASH_REQUEST_API = {
+
+  // Submit trash request
+  REQUEST_SUBMIT: `${API_BASE_URL}/user/pickup-request`,
+
+// Fetch all request
+  ALL_REQUESTS: `${API_BASE_URL}/user/all-pickup-requests`,
+  
+};
+

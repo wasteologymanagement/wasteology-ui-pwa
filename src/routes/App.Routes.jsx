@@ -19,25 +19,22 @@ import NotFound from "../pages/notfound/NotFoundPage";
 import Unauthorized from "../pages/unauthorized/UnauthorisePage";
 import Loading from "../components/Loading";
 import { ROLES } from "../utils/roleConstants";
-
+import ScrollToTop from "../components/ScrollToTop"; // ✅ Import it
 
 const AppRoutes = () => {
   const { isAuthenticated, role } = useAuthGuard();
-  // const isAuthenticated = true;
-  // const role = "user";
 
   return (
     <Router>
       <CssBaseline />
+      <ScrollToTop /> {/* ✅ Add this right after Router */}
       <Suspense fallback={<Loading />}>
         <Routes>
-          {/* testing comment */}
-          {/* 🌐 Public Website (phone/otp login & landing pages) */}
+          {/* 🌐 Public Website */}
           <Route path="/*" element={<PublicRoutes />} />
 
           {/* 🔒 Protected Dashboard Layout */}
           <Route element={<DashboardLayout role={role} />}>
-            {/* Admin Dashboard */}
             <Route
               element={
                 <ProtectedRoute
@@ -50,7 +47,6 @@ const AppRoutes = () => {
               <Route path="/app/admin/*" element={<AdminRoutes />} />
             </Route>
 
-            {/* Picker Dashboard */}
             <Route
               element={
                 <ProtectedRoute
@@ -63,7 +59,6 @@ const AppRoutes = () => {
               <Route path="/app/picker/*" element={<PickerRoutes />} />
             </Route>
 
-            {/* User Dashboard */}
             <Route
               element={
                 <ProtectedRoute
