@@ -104,7 +104,7 @@ const AdminTrashPicker = () => {
     const [open, setOpen] = useState(false);
 
     const handleOpen = () => setOpen(true);
-  
+
     useEffect(() => {
         dispatch(fetchTrashPickersThunk());
     }, [dispatch]);
@@ -498,9 +498,25 @@ const AdminTrashPicker = () => {
                                 getRowId={(row) => row.pickerId}
                                 columns={columns}
                                 loading={loading}
+                                initialState={{
+                                    pagination: { paginationModel: { pageSize: 10 } },
+                                    sorting: { sortModel: [{ field: "pickupDate", sort: "desc" }] },
+                                }}
                                 pageSizeOptions={[10, 25, 50]}
-                                disableSelectionOnClick
                                 disableRowSelectionOnClick
+                                components={{
+                                    NoRowsOverlay: () => (
+                                        <Stack height="100%" alignItems="center" justifyContent="center">
+                                            <Typography variant="body1" color="text.secondary">
+                                                No trash requests found
+                                            </Typography>
+                                        </Stack>
+                                    ),
+                                }}
+                                sx={{
+                                    "& .MuiDataGrid-cell": { fontSize: "0.9rem" },
+                                    "& .MuiDataGrid-columnHeaders": { fontWeight: "bold" },
+                                }}
                             />
                         </Box>
                     )}

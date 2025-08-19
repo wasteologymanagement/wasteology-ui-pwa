@@ -56,11 +56,11 @@ const AdminPricing = () => {
   });
   const [editMode, setEditMode] = useState(false);
 
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success", // 'success' | 'error' | 'warning' | 'info'
-  });
+  // const [snackbar, setSnackbar] = useState({
+  //   open: false,
+  //   message: "",
+  //   severity: "success", // 'success' | 'error' | 'warning' | 'info'
+  // });
   const [tab, setTab] = useState("ACTIVE");
 
   const [confirmDialog, setConfirmDialog] = useState({
@@ -492,9 +492,21 @@ const AdminPricing = () => {
       )
         : (
           <DataGrid
-            rows={filteredList} columns={columns} loading={status === "loading"}
-            pageSizeOptions={[10, 25, 50]} disableRowSelectionOnClick
-            autoHeight
+            rows={filteredList} columns={columns} loading={status === "loading"} getRowId={(row) => row.id}
+            initialState={{
+              pagination: { paginationModel: { pageSize: 10 } },
+            }}
+            pageSizeOptions={[10, 25, 50]}
+            disableRowSelectionOnClick
+            components={{
+              NoRowsOverlay: () => (
+                <Stack height="100%" alignItems="center" justifyContent="center">
+                  <Typography variant="body1" color="text.secondary">
+                    No price found
+                  </Typography>
+                </Stack>
+              ),
+            }}
           />
         )}
 

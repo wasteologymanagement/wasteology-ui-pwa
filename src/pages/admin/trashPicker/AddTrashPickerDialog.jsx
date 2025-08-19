@@ -12,8 +12,16 @@ import {
   Chip,
   Box,
   CircularProgress,
+  IconButton,
+  InputAdornment
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { createTrashPickerThunk } from "../../../store/slice/trashPickersSlice";
+import { useSnackbar } from "../../../components/SnackbarProvider";
+import { useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { useState } from "react";
 
 // Initial form state
 const initialFormState = {
@@ -44,14 +52,44 @@ const initialFormState = {
 };
 
 const AddTrashPickerDialog = ({ open, handleClose }) => {
-  const [formData, setFormData] = React.useState(initialFormState);
-  const [loading, setLoading] = React.useState(false);
+  const [formData, setFormData] = useState(initialFormState);
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+  const dispatch = useDispatch();
+  const { showMessage } = useSnackbar();
+  const [showPassword, setShowPassword] = useState(false);
+
+  // 👉 Clear error when modal is closed from parent
+  useEffect(() => {
+    if (!open) {
+      setErrors({});
+    }
+  }, [open]);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prev) => !prev);
+  };
 
   // Handle top-level field changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
+    if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Enter a valid email";
+    }
+    if (!formData.phone.trim()) newErrors.phone = "Phone number is required";
+    if (!formData.password.trim()) newErrors.password = "Password is required";
+    return newErrors;
+  };
+
 
   // Handle nested address fields
   const handleAddressChange = (e) => {
@@ -110,17 +148,44 @@ const AddTrashPickerDialog = ({ open, handleClose }) => {
   };
 
   // Submit the form
-  const handleFormSubmit = () => {
-    setLoading(true);
-    console.log("Form submitted:", formData);
+  // const handleFormSubmit = () => {
+  //   setLoading(true);
+  //   console.log("Form submitted:", formData);
 
-    // Simulate async submission
-    setTimeout(() => {
+  //   // Simulate async submission
+  //   setTimeout(() => {
+  //     setLoading(false);
+  //     setFormData(initialFormState);
+  //     handleClose();
+  //   }, 1000);
+  // };
+
+  const handleFormSubmit = async () => {
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      showMessage("Please fix the errors in the form", "error");
+      return;
+    }
+
+    setErrors({});
+    setLoading(true);
+    try {
+      const resultAction = await dispatch(createTrashPickerThunk(formData));
+      if (createTrashPickerThunk.fulfilled.match(resultAction)) {
+        showMessage(resultAction.payload?.message || "Added successfully", "success");
+        setFormData(initialFormState);
+        handleClose();
+      } else {
+        showMessage(resultAction.error?.message || "Failed to create picker", "error");
+      }
+    } catch (error) {
+      showMessage(error.message || "Operation failed", "error");
+    } finally {
       setLoading(false);
-      setFormData(initialFormState);
-      handleClose();
-    }, 1000);
+    }
   };
+
 
   return (
     <Dialog
@@ -148,6 +213,8 @@ const AddTrashPickerDialog = ({ open, handleClose }) => {
               onChange={handleInputChange}
               fullWidth
               required
+              error={!!errors.firstName}
+              helperText={errors.firstName}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -158,6 +225,8 @@ const AddTrashPickerDialog = ({ open, handleClose }) => {
               onChange={handleInputChange}
               fullWidth
               required
+              error={!!errors.lastName}
+              helperText={errors.lastName}
             />
           </Grid>
           <Grid item xs={12}>
@@ -169,6 +238,8 @@ const AddTrashPickerDialog = ({ open, handleClose }) => {
               onChange={handleInputChange}
               fullWidth
               required
+              error={!!errors.email}
+              helperText={errors.email}
             />
           </Grid>
           <Grid item xs={12}>
@@ -176,20 +247,43 @@ const AddTrashPickerDialog = ({ open, handleClose }) => {
               label="Phone"
               name="phone"
               value={formData.phone}
-              onChange={handleInputChange}
+              onChange={(e) => {
+                const value = e.target.value;
+                // Allow only digits and max 10 characters
+                if (/^\d{0,10}$/.test(value)) {
+                  handleInputChange(e);
+                }
+              }}
               fullWidth
               required
+              error={!!errors.phone}
+              helperText={errors.phone || "Enter 10 digit phone number"}
+              inputProps={{ maxLength: 10 }}
             />
           </Grid>
           <Grid item xs={12}>
             <TextField
               label="Password"
               name="password"
-              type="password"
+              type={showPassword ? "text" : "password"}   // 👈 toggle input type
               value={formData.password}
               onChange={handleInputChange}
               fullWidth
               required
+              error={!!errors.password}
+              helperText={errors.password}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={togglePasswordVisibility}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
           </Grid>
 
