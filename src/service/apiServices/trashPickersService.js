@@ -36,9 +36,9 @@ export const getAllActiveTrashPickers = async () => {
 }
 
 // Get trash picker by ID
-export const getTrashPickerById = async (id, updatedData) => {
+export const getTrashPickerById = async (id) => {
     try {
-        const response = await axiosInstance.put(ADMIN_API.UPDATE_PICKER_BY_ID(id), updatedData);
+        const response = await axiosInstance.get(ADMIN_API.GET_PICKER_BY_ID(id));
         return response.data;
     } catch (error) {
         console.error(`Error updating trash picker ${id}:`, error);

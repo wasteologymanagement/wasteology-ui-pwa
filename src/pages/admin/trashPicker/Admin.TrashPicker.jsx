@@ -31,6 +31,7 @@ import {
     Restore as RestoreIcon
 } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from 'react-router-dom';
 import {
     activateTrashPickerThunk,
     permanentDeleteTrashPickerThunk,
@@ -81,6 +82,7 @@ const TABS = [
 
 const AdminTrashPicker = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("md"));
     const { trashPickers, loading, error, message } = useSelector((state) => state.trashPickers);
@@ -172,6 +174,11 @@ const AdminTrashPicker = () => {
             console.error("Activation error:", error);
             showMessage(error?.message || "Failed to activate", "error");
         }
+    };
+
+    // Navigate to details
+    const handleNavigate = (req) => {
+        navigate(`/app/admin/pickers-details/${req.pickerId}`, { state: req });
     };
 
 
@@ -496,6 +503,7 @@ const AdminTrashPicker = () => {
                             <DataGrid
                                 rows={filteredTrashPickers}
                                 getRowId={(row) => row.pickerId}
+                                onRowClick={(params) => handleNavigate(params.row)}
                                 columns={columns}
                                 loading={loading}
                                 initialState={{

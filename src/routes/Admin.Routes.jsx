@@ -8,6 +8,7 @@ import AdminTrashPicker from "../pages/admin/trashPicker/Admin.TrashPicker";
 import AdminTrashRequestDetails from "../pages/admin/trashrequest/Admin.TrashRequestDetails";
 import AdminTrashPickerClientList from "../pages/admin/Admin.TrashPickerClientList";
 import { ROLES } from "../utils/roleConstants";
+import AdminTrashPickerDetails from "../pages/admin/trashPicker/Admin.TrashPickerDetails";
 
 const AdminRoutes = ({ isAuthenticated, role }) => {
   return (
@@ -29,6 +30,7 @@ const AdminRoutes = ({ isAuthenticated, role }) => {
         <Route path="trash-request" element={<AdminTrashRequest />} />
         <Route path="pickers-list" element={<AdminTrashPicker />} />
         <Route path="rates" element={<AdminPricing />} />
+        <Route path="pickers-details/:pickerId" element={<AdminTrashPickerDetails />} />
 
         {/* Example child route for TrashRequestPage */}
         <Route
