@@ -1,6 +1,6 @@
 
 import axiosInstance from "../axiosInstance";
-import { ADMIN_API } from "./endpoints/apiConstants";
+import { ADMIN_API, PICKERS_API } from "./endpoints/apiConstants";
 
 // Register a new trash picker
 export const registerTrashPicker = async (trashPickerData) => {
@@ -84,4 +84,17 @@ export const activateSoftDeletedTrashPicker = async (id) => {
   const response = await axiosInstance.put(ADMIN_API.GET_ACTIVATE_TRASH_PICKER(id));
   return response.data;
 };
+
+
+// Get picker profile details
+export const getPickerProfilebyPickerId = async (id) => {
+    const response = await axiosInstance.get(PICKERS_API.PICKER_PROFILE(id));
+    return response.data;
+} 
+
+// Get picker profile details by picker user id
+export const getPickerProfilebyPickerUserId = async (id) => {
+    const response = await axiosInstance.get(PICKERS_API.PICKER_PROFILE_BY_USERID(id));
+    return response.data;
+} 
 

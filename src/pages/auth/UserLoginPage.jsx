@@ -1,244 +1,291 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import userLoginPng from "../../assets/user_login.png";
-import { Snackbar, Alert } from "@mui/material";
-import {
-  getAuth,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-} from "firebase/auth";
-import { firebaseApp } from "../../service/firbaseService";
-import { authenticateUser } from "../../service/apiServices/authService";
-import { saveTokens } from "../../utils/tokensUtils";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import {
-  fetchUserByPhoneNumber,
-  loginSuccess,
-} from "../../store/slice/userSlice";
+import { motion } from "framer-motion";
+
+import { requestOtpApi, resendOtpApi, verifyOtpApi } from "../../service/apiServices/otpService";
+import { saveTokens } from "../../utils/tokensUtils";
+// import { loginSuccess } from "../../store/slice/userSlice";
+import { useSnackbar } from "../../components/SnackbarProvider";
+import { loginWithOtp } from "../../store/slice/authSlice";
 
 const UserLoginPage = () => {
-  const location = useLocation();
-  const phone = location.state?.phone || "";
-  const [mobileNumber, setMobileNumber] = useState(phone);
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState("");
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-  const [confirmationResult, setConfirmationResult] = useState(null);
-  const auth = getAuth(firebaseApp);
-  const recaptchaRef = useRef(null);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "info",
-  });
-  const dispatch = useDispatch();
 
-  const isValidMobile = (num) => /^(\+91)?[6-9]\d{9}$/.test(num);
+    const [mobile, setMobile] = useState("");
+    const [otp, setOtp] = useState("");
+    const [step, setStep] = useState(1); // 1 = mobile, 2 = otp
+    const [loading, setLoading] = useState(false);
+    const [timer, setTimer] = useState(0); // seconds countdown for OTP expiry
+    const { showMessage } = useSnackbar();
 
-  useEffect(() => {
-    setupRecaptcha();
-    // eslint-disable-next-line
-  }, []);
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const OTP_DURATION = 120; // 5 min = 300 sec
 
-  const setupRecaptcha = () => {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(
-        auth,
-        recaptchaRef.current,
-        {
-          size: "invisible",
-          callback: () => {},
+    // Countdown effect for resend OTP
+    useEffect(() => {
+        let interval;
+        if (timer > 0) {
+            interval = setInterval(() => {
+                setTimer((prev) => prev - 1);
+            }, 1000);
         }
-      );
-    }
-  };
+        return () => clearInterval(interval);
+    }, [timer]);
 
-  const showSnackbar = (message, severity = "info") => {
-    setSnackbar({ open: true, message, severity });
-  };
+    const handleGetOtp = async () => {
+        if (!/^[6-9]\d{9}$/.test(mobile)) {
+            showMessage("Enter valid 10-digit mobile number", "error")
+            return;
+        }
+        setLoading(true);
 
-  const handleSendOtp = async () => {
-    if (!isValidMobile(mobileNumber)) {
-      showSnackbar("Please enter a valid Indian mobile number", "warning");
-      return;
-    }
+        // 🔥 Call backend API here to send OTP
+        try {
+            const response = await requestOtpApi(mobile);
 
-    setLoading(true);
-    try {
-      // const appVerifier = window.recaptchaVerifier;
-      // const result = await signInWithPhoneNumber(
-      //   auth,
-      //   `+91${mobileNumber}`,
-      //   appVerifier
-      // );
-      // setConfirmationResult(result);
-      setOtpSent(true);
-      showSnackbar("OTP sent successfully", "success");
-    } catch (err) {
-      console.error("OTP sending error:", err);
-      showSnackbar("Failed to send OTP", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
+            console.log("OTP request response:", response);
 
-  const handleVerifyOtp = async () => {
-    if (!otp || otp.length !== 6) {
-      showSnackbar("Please enter all 6 digits.", "warning");
-      return;
-    }
+            if (!response?.success) {
+                throw new Error(response?.message || "Failed to request OTP");
+            }
 
-    // if (!confirmationResult) {
-    //   showSnackbar("OTP confirmation not initialized.", "error");
-    //   return;
-    // }
+            // ✅ OTP requested successfully
+            setStep(2); // move to OTP entry step
+            setOtp("");
+            setTimer(OTP_DURATION);
 
-    setLoading(true);
+            showMessage("OTP sent successfully!", "success");
 
-    try {
-      // await confirmationResult.confirm(otp);
-      // showSnackbar("OTP verified", "success");
-      // const tokens = await fetchAccessToken();
+        } catch (err) {
+            console.error("Error requesting OTP:", err);
 
-      // const fullPhone = `+91${mobileNumber}`;
-      // const userData = await dispatch(
-      //   fetchUserByPhoneNumber(fullPhone)
-      // ).unwrap();
+            showMessage(err?.message || "Something went wrong while requesting OTP", "error");
 
-      // dispatch(loginSuccess(userData));
-      showSnackbar("Login successful", "success");
+        } finally {
+            setLoading(false);
+        }
+    };
 
-      setTimeout(() => {
-        setLoading(false);
-        navigate("/app/user/schedule");
-      }, 500);
-    } catch (err) {
-      console.error("OTP verification failed:", err);
-      showSnackbar("Invalid or expired OTP.", "error");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const handleVerifyOtp = async () => {
+        if (!/^\d{6}$/.test(otp)) {
+            showMessage("Enter valid 6-digit OTP", "error");
+            return;
+        }
+        setLoading(true);
 
-  const fetchAccessToken = async () => {
-    try {
-      const response = await authenticateUser();
-      if (!response || !response.accessToken) {
-        throw new Error("No access token");
-      }
-      saveTokens({
-        accessToken: response.accessToken,
-        refreshToken: response.refreshToken,
-      });
-      return response;
-    } catch (error) {
-      console.error("Token fetch error:", error);
-      throw error;
-    }
-  };
+        // 🔥 Call backend API here to verify OTP
+        try {
+            // const response = await verifyOtpApi(mobile, otp);
+            const resultAction = await dispatch(
+                loginWithOtp( {mobile, otp} )
+            );
 
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4 py-6 sm:px-6 md:px-8">
-      {/* Card */}
-      <div className="w-full max-w-md bg-white p-6 rounded-2xl shadow-xl space-y-6">
-        {/* Header */}
-        <div className="text-center space-y-3">
-          <img
-            src={userLoginPng}
-            alt="Login Illustration"
-            className="h-24 sm:h-28 mx-auto"
-          />
-          <h2 className="text-2xl font-semibold text-gray-800">
-            Welcome Back 👋
-          </h2>
-          <p className="text-sm text-gray-500">
-            Login using your mobile number
-          </p>
+            if (loginWithOtp.rejected.match(resultAction)) {
+                throw new Error(resultAction.payload || "Login failed");
+            }
+
+            const response = resultAction.payload;
+
+            console.log("OTP verify response:", response);
+
+            if (!response?.access_token || !response?.refresh_token) {
+                throw new Error(response?.message || "Invalid or expired OTP");
+            }
+
+            // ✅ OTP verified successfully → redirect
+            showMessage("OTP verified successfully!", "success");
+            // saveTokens({
+            //     accessToken: response.access_token,
+            //     refreshToken: response.refresh_token,
+            // });
+
+            // dispatch(loginSuccess({ role: response.role, ...response }));
+            navigate("/app/user/dashboard"); // or wherever you need to redirect
+        } catch (err) {
+            console.error("Error verifying OTP:", err);
+            showMessage(err?.message || "Something went wrong while verifying OTP", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleResendOtp = async () => {
+        if (!/^[6-9]\d{9}$/.test(mobile)) {
+            alert("Enter valid 10-digit mobile number");
+            return;
+        }
+        setLoading(true);
+
+        try {
+            // 🔥 Call backend API here to resend OTP
+            // await api.post("/resend-otp", { mobile });
+
+            setTimeout(() => {
+                setLoading(false);
+                setOtp("");
+                setTimer(OTP_DURATION); // restart 5 min timer
+                alert("OTP has been resent!");
+            }, 1000);
+
+        } catch (error) {
+            console.error("Resend OTP failed:", error);
+            alert("Failed to resend OTP. Please try again.");
+            setLoading(false);
+        }
+    };
+
+    // ✅ Helper to format time as mm:ss
+    const formatTime = (seconds) => {
+        const m = String(Math.floor(seconds / 60)).padStart(2, "0");
+        const s = String(seconds % 60).padStart(2, "0");
+        return `${m}:${s}`;
+    };
+
+    // Circle progress for countdown
+    const circleRadius = 18;
+    const circumference = 2 * Math.PI * circleRadius;
+    const progress =
+        timer > 0 ? (timer / OTP_DURATION) * circumference : 0;
+
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-green-100 p-6">
+            <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="w-full max-w-sm bg-white shadow-xl rounded-3xl p-8 relative overflow-hidden"
+            >
+                {/* Decorative Circle */}
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-green-200 rounded-full opacity-40 animate-pulse"></div>
+
+                <h1 className="text-2xl font-extrabold text-center text-green-700 mb-2">
+                    Waste Pickup Login
+                </h1>
+                <p className="text-sm text-gray-500 text-center mb-6">
+                    Enter your mobile number to receive OTP
+                </p>
+
+                {step === 1 && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.5 }}
+                    >
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Mobile Number
+                        </label>
+                        <div className="flex items-center border rounded-xl overflow-hidden bg-gray-50">
+                            <span className="flex items-center px-3 text-gray-700 text-sm bg-gray-100 border-r">
+                                🇮🇳 +91
+                            </span>
+                            <input
+                                type="tel"
+                                maxLength={10}
+                                value={mobile}
+                                onChange={(e) =>
+                                    setMobile(e.target.value.replace(/\D/g, "")) // only digits
+                                }
+                                className="w-full px-4 py-3 bg-transparent focus:outline-none focus:ring-0"
+                                placeholder="Enter 10-digit mobile"
+                            />
+                        </div>
+                        <button
+                            onClick={handleGetOtp}
+                            disabled={loading}
+                            className="w-full mt-5 bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 shadow-md transition disabled:opacity-50"
+                        >
+                            {loading ? "Sending..." : "Get OTP"}
+                        </button>
+                    </motion.div>
+                )}
+
+                {step === 2 && (
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.5 }}
+                    >
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Enter OTP
+                        </label>
+                        <input
+                            type="text"
+                            maxLength={6}
+                            value={otp}
+                            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                            className="w-full px-4 py-3 border rounded-xl tracking-widest text-center focus:ring-2 focus:ring-green-500 outline-none text-lg font-bold"
+                            placeholder="••••••"
+                        />
+                        <button
+                            onClick={handleVerifyOtp}
+                            disabled={loading}
+                            className="w-full mt-5 bg-green-600 text-white py-3 rounded-xl font-semibold hover:bg-green-700 shadow-md transition disabled:opacity-50"
+                        >
+                            {loading ? "Verifying..." : "Verify & Login"}
+                        </button>
+
+                        {/* Resend OTP with Circular Countdown */}
+                        {timer > 0 ? (
+                            <div className="flex flex-col items-center mt-4">
+                                <div className="relative flex items-center justify-center">
+                                    <svg
+                                        className="w-12 h-12 transform -rotate-90"
+                                        viewBox="0 0 40 40"
+                                    >
+                                        <circle
+                                            cx="20"
+                                            cy="20"
+                                            r={circleRadius}
+                                            stroke="#e5e7eb"
+                                            strokeWidth="4"
+                                            fill="none"
+                                        />
+                                        <circle
+                                            cx="20"
+                                            cy="20"
+                                            r={circleRadius}
+                                            stroke="#16a34a"
+                                            strokeWidth="4"
+                                            fill="none"
+                                            strokeDasharray={circumference}
+                                            strokeDashoffset={circumference - progress}
+                                            strokeLinecap="round"
+                                        />
+                                    </svg>
+                                    <span className="absolute text-sm font-medium text-green-700">
+                                        {formatTime(timer)}
+                                    </span>
+                                </div>
+                                <p className="text-gray-500 text-xs mt-2">
+                                    OTP valid for 5 minutes
+                                </p>
+                            </div>
+                        ) : (
+                            <button
+                                onClick={handleGetOtp}
+                                className="w-full mt-4 text-sm text-green-600 hover:underline"
+                            >
+                                🔄 Resend OTP
+                            </button>
+                        )}
+
+                        <button
+                            onClick={() => setStep(1)}
+                            className="w-full mt-2 text-sm text-gray-600 hover:underline"
+                        >
+                            Change Mobile Number
+                        </button>
+                    </motion.div>
+                )}
+
+                {/* Footer / Branding */}
+                <p className="text-xs text-gray-400 text-center mt-6">
+                    ♻️ Eco-friendly Pickup Service
+                </p>
+            </motion.div>
         </div>
+    );
+}
 
-        {/* Input Section */}
-        {!otpSent ? (
-          <>
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">
-                Mobile Number
-              </label>
-              <div className="flex border border-gray-300 rounded-xl overflow-hidden">
-                <span className="bg-gray-100 text-gray-700 px-3 flex items-center text-sm">
-                  🇮🇳 +91
-                </span>
-                <input
-                  type="tel"
-                  placeholder="9876543210"
-                  value={mobileNumber}
-                  maxLength={10}
-                  onChange={(e) => setMobileNumber(e.target.value)}
-                  className="flex-1 px-3 py-2 text-sm outline-none"
-                />
-              </div>
-            </div>
-
-            <button
-              onClick={handleSendOtp}
-              disabled={loading}
-              className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-full font-semibold transition duration-150"
-            >
-              {loading ? "Sending OTP..." : "Send OTP"}
-            </button>
-          </>
-        ) : (
-          <>
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">
-                Enter OTP
-              </label>
-              <input
-                type="text"
-                placeholder="6-digit OTP"
-                value={otp}
-                maxLength={6}
-                onChange={(e) => setOtp(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-xl outline-none text-sm"
-              />
-            </div>
-
-            <button
-              onClick={handleVerifyOtp}
-              disabled={loading}
-              className="w-full bg-green-700 hover:bg-green-800 text-white py-2 rounded-full font-semibold transition duration-150"
-            >
-              {loading ? "Verifying..." : "Verify & Login"}
-            </button>
-          </>
-        )}
-      </div>
-
-      {/* Footer Text */}
-      <p className="text-xs text-gray-400 text-center mt-6 max-w-xs">
-        By continuing, you agree to our{" "}
-        <span className="underline cursor-pointer">Terms</span> and{" "}
-        <span className="underline cursor-pointer">Privacy Policy</span>.
-      </p>
-
-      <div ref={recaptchaRef} />
-
-      {/* Snackbar */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          severity={snackbar.severity}
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </div>
-  );
-};
-
-export default UserLoginPage;
+export default UserLoginPage

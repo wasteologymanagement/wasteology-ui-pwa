@@ -110,8 +110,18 @@ export const TRASH_REQUEST_API = {
   // Submit trash request
   REQUEST_SUBMIT: `${API_BASE_URL}/user/pickup-request`,
 
-// Fetch all request
+  // Fetch all request
   ALL_REQUESTS: `${API_BASE_URL}/user/all-pickup-requests`,
   
 };
+
+// 👤 Pickers API Endpoints
+export const PICKERS_API = {
+
+  //fetch picker pofile
+  PICKER_PROFILE: (id) => `${API_BASE_URL}/picker/${id}`,
+
+  //fetch picker pofile by user id
+  PICKER_PROFILE_BY_USERID: (id) => `${API_BASE_URL}/picker/user/${id}`
+}
 

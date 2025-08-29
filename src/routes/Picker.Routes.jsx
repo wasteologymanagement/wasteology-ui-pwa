@@ -14,7 +14,8 @@ const ClientRoutes = ({ isAuthenticated, role }) => {
         <Route key='clientDashboard' path="dashboard" element={<ClientDashboard />} />
         <Route path="trash-list" element={<TrashPickerRequestListPage />} />
         <Route path="trash-details/:trashRequestId" element={<TrashRequestDetailPage />} />
-        <Route path="profile" element={<ComingSoonPage />} />
+        <Route path="profile" element={<TrashPickerProfilePage />} />
+        {/* <Route path="profile" element={<ComingSoonPage />} /> */}
       </Route>
     </Routes>
   );

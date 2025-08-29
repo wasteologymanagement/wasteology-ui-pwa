@@ -4,7 +4,8 @@ import { useDispatch } from "react-redux";
 
 import { loginApi } from "../../service/apiServices/loginService";
 import { saveTokens } from "../../utils/tokensUtils";
-import { loginSuccess } from "../../store/slice/userSlice";
+// import { loginAdminSuccess, loginSuccess } from "../../store/slice/userSlice";
+import { loginWithCredentials } from "../../store/slice/authSlice";
 import { ROLES } from "../../utils/roleConstants";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
@@ -38,20 +39,30 @@ const AdminLoginPage = () => {
 
     setLoading(true);
     try {
-      const response = await loginApi({ email: username, password });
+      // const response = await loginApi({ email: username, password });
+
+      const resultAction = await dispatch(
+        loginWithCredentials({ email: username, password })
+      );
+
+      if (loginWithCredentials.rejected.match(resultAction)) {
+        throw new Error(resultAction.payload || "Login failed");
+      }
+
+      const response = resultAction.payload;
 
       console.log('response : ', response);
 
-      if (!response?.access_token || !response?.refresh_token) {
-        throw new Error("Invalid response from server");
-      }
+      // if (!response?.access_token || !response?.refresh_token) {
+      //   throw new Error("Invalid response from server");
+      // }
 
-      saveTokens({
-        accessToken: response.access_token,
-        refreshToken: response.refresh_token,
-      });
+      // saveTokens({
+      //   accessToken: response.access_token,
+      //   refreshToken: response.refresh_token,
+      // });
 
-      dispatch(loginSuccess({ role: response.role, ...response }));
+      // dispatch(loginAdminSuccess({ role: response.role, ...response }));
       handleRoleRedirect(response.role);
     } catch (err) {
       setAlert({

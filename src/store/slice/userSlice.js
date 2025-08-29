@@ -1,6 +1,9 @@
+// store/slice/userSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getAccessToken } from "../../utils/tokensUtils";
-import { fetchUserDetails } from "../../service/apiServices/userService";
+import {
+  fetchUserDetailsById,
+  fetchUserDetailsByPhoneNumber,
+} from "../../service/apiServices/userService";
 import {
   addAddressApi,
   deleteAddressApi,
@@ -8,67 +11,82 @@ import {
 } from "../../service/apiServices/addressService";
 import { ROLES } from "../../utils/roleConstants";
 
-// Thunk: Fetch user by phone number (OTP login)
+/* ==========================================================
+   USER CRUD THUNKS
+   ========================================================== */
+
+// Fetch user by phone number
 export const fetchUserByPhoneNumber = createAsyncThunk(
   "user/fetchUserByPhoneNumber",
   async (phoneNumber, { rejectWithValue }) => {
     try {
-      const response = await fetchUserDetails(phoneNumber);
-      console.log("User fetch response:", response);
-      return response;
+      const res = await fetchUserDetailsByPhoneNumber(phoneNumber);
+      return res.data;
     } catch (error) {
-      console.error("Fetch user error:", error);
       return rejectWithValue(error.message);
     }
   }
 );
 
-// Thunk: Add new address
+// Fetch user by ID
+export const fetchUserById = createAsyncThunk(
+  "user/fetchUserById",
+  async (userId, { rejectWithValue }) => {
+    try {
+      const res = await fetchUserDetailsById(userId);
+      return res.data; 
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Add new address
 export const addAddress = createAsyncThunk(
   "user/addAddress",
   async (address, { dispatch, rejectWithValue }) => {
     try {
       await addAddressApi(address);
-      await dispatch(fetchUserByPhoneNumber(address.userPhoneNumber));
+      await dispatch(fetchUserByPhoneNumber(address.userPhoneNumber)); // refresh user
     } catch (error) {
-      console.log("error in slice : ", error)
-      return rejectWithValue(error);
+      return rejectWithValue(error.message);
     }
   }
 );
 
-// Thunk: Edit address
+// Edit address
 export const editAddress = createAsyncThunk(
   "user/editAddress",
   async (address, { dispatch, rejectWithValue }) => {
     try {
       await editAddressApi(address.userId, address.addressId, address);
-      await dispatch(fetchUserByPhoneNumber(address.userPhoneNumber));
+      await dispatch(fetchUserByPhoneNumber(address.userPhoneNumber)); // refresh user
     } catch (error) {
       return rejectWithValue(error.message);
     }
   }
 );
 
-// Thunk: Delete address
+// Delete address
 export const deleteAddress = createAsyncThunk(
   "user/deleteAddress",
   async (data, { dispatch, rejectWithValue }) => {
     try {
       await deleteAddressApi(data.userId, data.currentAddressId);
-      await dispatch(fetchUserByPhoneNumber(data.userPhoneNumber));
+      await dispatch(fetchUserByPhoneNumber(data.userPhoneNumber)); // refresh user
     } catch (error) {
       return rejectWithValue(error.message);
     }
   }
 );
 
+/* ==========================================================
+   SLICE
+   ========================================================== */
+
 const initialState = {
   user: null,
-  role: null, // 'user', 'admin', or 'picker'
-  isAuthenticated: false,
-  isExistingUser: false,
-  isAdmin: false, // Deprecated in favor of role (but kept for backward compatibility)
+  role: null,
   status: "idle",
   loading: false,
   error: null,
@@ -78,41 +96,13 @@ const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
-    // For OTP-based user login
-    loginSuccess: (state, action) => {
-      const { role, ...user } = action.payload;
-      state.user = user;
-      state.role = role || "user"; // fallback for users
-      state.isAuthenticated = true;
-      state.status = "succeeded";
-      state.isExistingUser = true;
-      state.isAdmin = role === ROLES.ADMIN;
-    },
-
-    // For admin/picker login
-    loginAdminSuccess: (state, action) => {
-      const { role, ...user } = action.payload;
-      state.user = user;
-      state.role = role; // must be explicitly provided
-      state.isAuthenticated = true;
-      state.status = "succeeded";
-      state.isExistingUser = null;
-      state.isAdmin = role === ROLES.ADMIN; // backward compat
-    },
-
-    // Logout and clear everything
-    logout: (state) => {
-      Object.assign(state, initialState);
-    },
-
     clearUser: (state) => {
       Object.assign(state, initialState);
     },
   },
-
   extraReducers: (builder) => {
     builder
-      // Fetch user by phone number
+      /* ------------------ Fetch User by Phone ------------------ */
       .addCase(fetchUserByPhoneNumber.pending, (state) => {
         state.status = "loading";
         state.error = null;
@@ -122,24 +112,35 @@ const userSlice = createSlice({
         if (action.payload.message === "User not found") {
           state.user = null;
           state.role = null;
-          state.isAuthenticated = false;
-          state.isExistingUser = false;
         } else {
           const { role, ...user } = action.payload;
           state.user = user;
-          state.role = role || "user";
-          state.isAuthenticated = true;
-          state.isExistingUser = true;
+          state.role = role || ROLES.USER;
         }
         state.status = "succeeded";
       })
       .addCase(fetchUserByPhoneNumber.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload;
-        state.isExistingUser = null;
       })
 
-      // Add Address
+      /* ------------------ Fetch User by ID ------------------ */
+      .addCase(fetchUserById.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(fetchUserById.fulfilled, (state, action) => {
+        const { role, ...user } = action.payload;
+        state.user = user;
+        state.role = role || ROLES.USER;
+        state.status = "succeeded";
+      })
+      .addCase(fetchUserById.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload;
+      })
+
+      /* ------------------ Address CRUD ------------------ */
       .addCase(addAddress.pending, (state) => {
         state.loading = true;
       })
@@ -152,8 +153,6 @@ const userSlice = createSlice({
         state.status = "failed";
         state.error = action.payload;
       })
-
-      // Edit Address
       .addCase(editAddress.pending, (state) => {
         state.loading = true;
       })
@@ -166,8 +165,6 @@ const userSlice = createSlice({
         state.status = "failed";
         state.error = action.payload;
       })
-
-      // Delete Address
       .addCase(deleteAddress.pending, (state) => {
         state.loading = true;
       })
@@ -183,16 +180,14 @@ const userSlice = createSlice({
   },
 });
 
-// Action creators
-export const { loginSuccess, loginAdminSuccess, logout, clearUser } =
-  userSlice.actions;
+/* ==========================================================
+   EXPORTS
+   ========================================================== */
 
-// Selector helpers (optional)
-export const selectIsAuthenticated = (state) => state.user.isAuthenticated;
+export const { clearUser } = userSlice.actions;
+
 export const selectUser = (state) => state.user.user;
 export const selectRole = (state) => state.user.role;
-export const selectIsAdmin = (state) => state.user.role === ROLES.ADMIN;
-export const selectIsPicker = (state) => state.user.role === ROLES.PICKER;
 export const selectIsUser = (state) => state.user.role === ROLES.USER;
 
 export default userSlice.reducer;

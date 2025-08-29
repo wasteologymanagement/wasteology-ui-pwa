@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { selectIsAuthenticated, selectRole } from "../store/slice/userSlice";
+import { selectIsAuthenticated, selectRole } from "../store/slice/authSlice";
 
 
 const ProtectedRoute = ({ allowedRoles }) => {

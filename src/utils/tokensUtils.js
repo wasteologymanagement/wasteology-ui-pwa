@@ -7,6 +7,12 @@ export const getAccessToken = () => localStorage.getItem(ACCESS_TOKEN_KEY);
 // Get refresh token
 export const getRefreshToken = () => localStorage.getItem(REFRESH_TOKEN_KEY);
 
+// Set access token
+export const setAccessToken = (accessToken) => localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+
+// Set refresh token
+export const setRefreshToken = (refreshToken) => localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+
 // Save tokens to localStorage
 export const saveTokens = ({ accessToken, refreshToken }) => {
   // console.log("here in save token : ", { accessToken, refreshToken })
@@ -21,7 +27,7 @@ export const updateTokens = ({ accessToken, refreshToken }) => {
 };
 
 // Remove tokens (for logout scenarios)
-export const removeTokens = () => { 
+export const removeTokens = () => {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
 };

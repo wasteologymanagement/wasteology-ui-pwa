@@ -13,7 +13,7 @@ import {
 import { Menu as MenuIcon } from "lucide-react";
 import logo from "../assets/logo/logo4.png"
 import { useDispatch } from "react-redux";
-import { logout } from '../store/slice/userSlice';
+import { logout } from '../store/slice/authSlice';
 import { removeTokens } from '../utils/tokensUtils';
 import { useNavigate } from "react-router-dom";
 

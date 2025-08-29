@@ -1,47 +1,54 @@
-import React from "react";
+import React, { useState, useEffect } from 'react';
 import {
   FaCalendarCheck,
-  FaRecycle,
-  FaBullhorn,
-  FaLeaf,
-  FaQuestionCircle,
+  FaTruck,
 } from "react-icons/fa";
-import {
-  MdCalendarToday,
-  MdRecycling,
-  MdOutlineStar,
-  MdCheckCircle,
-  MdNotificationsActive,
-  MdAttachMoney,
-  MdModeNight,
-  MdBrightness7,
-  MdPerson,
-  MdLocalShipping,
-  MdScale,
-} from "react-icons/md";
-import {
-  FiPlusCircle,
-  FiCalendar,
-  FiClock,
-  FiMapPin,
-  FiUser,
-  FiTrendingUp,
-  FiRefreshCcw,
-  FiCheckCircle,
-  FiInfo,
-} from "react-icons/fi";
-import { FaTruck, FaDollarSign, FaMapMarkerAlt } from "react-icons/fa";
-import { MdFeedback, MdPeople } from "react-icons/md";
-import { BiTask } from "react-icons/bi";
-import { RiInformationFill } from "react-icons/ri";
+import { getPickerProfilebyPickerUserId } from '../../service/apiServices/trashPickersService';
+import { useSelector } from "react-redux";
 
-const ClientDashboard = () => {
+const PickerDashboard = () => {
+
+  const userState = useSelector((state) => state.user || state.auth);
+  const userId = userState?.user?.userDetails?.userId;
+
+  console.log("user state : ", userState);
+
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!userId) return;
+
+      try {
+        setLoading(true);
+        const res = await getPickerProfilebyPickerUserId(userId);
+
+        // Use a local variable to log immediately
+        const profileData = res?.data || res;
+        console.log("Fetched profile:", profileData);
+
+        // Update state
+        setProfile(profileData);
+      } catch (err) {
+        console.error("Error fetching profile:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [userId]);
+
+
+  if (loading) return <div>Loading picker dashboard...</div>;
+
   return (
     <div className="bg-gray-50 text-gray-800 p-6 md:p-10 transition-all mb-10">
       {/* Welcome Section */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800">
-          👋 Welcome Back, Ankit
+          👋 Welcome Back, {profile?.firstName || 'User'}
         </h1>
         <p className="text-gray-500 text-sm">
           Let's manage your scrap pickups efficiently 🌿
@@ -147,4 +154,4 @@ const ClientDashboard = () => {
   );
 };
 
-export default ClientDashboard;
+export default PickerDashboard;

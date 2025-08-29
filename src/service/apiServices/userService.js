@@ -1,4 +1,5 @@
 import axiosInstance from '../axiosInstance';
+import { USER_API } from './endpoints/apiConstants';
 import { USER_ENDPOINTS } from './endpoints/apiEndpoints';
 
 export const fetchUserDetails = async (phoneNumber) => {
@@ -51,3 +52,20 @@ export const registerUserApi = async (formData) => {
     throw error;
   }
 };
+
+
+
+// Fetch user details by user ID
+export const fetchUserDetailsById = async (userId) => {
+  const response = await axiosInstance.get(USER_API.GET_BY_ID(userId));
+  return response.data;
+};
+
+// ✅ Fetch user details by phone number
+export const fetchUserDetailsByPhoneNumber = async (phoneNumber) => {
+  const response = await axiosInstance.get(
+    `${USER_API.GET_BY_MOBILE}?mobile=${phoneNumber}`
+  );
+  return response.data;
+};
+
