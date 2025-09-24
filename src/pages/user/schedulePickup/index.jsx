@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import StepOnePickupDetails from "./StepOnePickupDetails";
 import StepTwoWasteSelection from "./StepTwoWasteSelection";
 import StepThreeReviewAndSubmit from "./StepThreeReviewAndSubmit";
@@ -7,62 +7,68 @@ import { trashRequestApi } from "../../../service/apiServices/pickupRequestServi
 import { formatToYMDWithSlashes } from "../../../utils/dateFormatter";
 import TrashrequestSubmitSuccessPopUp from "../../../components/TrashrequestSubmitSuccessPopUp";
 import { useNavigate } from "react-router-dom";
+import { selectUser } from "../../../store/slice/userSlice";
 
 const SchedulePickupForm = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const navigate = useNavigate();
-  const user = useSelector((state) => state.user.user);
+
+  // get logged-in userId from auth slice
+  const authState = useSelector((state) => state.auth);
+  const userId = authState?.userId;
+
+  // get user slice state
+  const userDetails = useSelector(selectUser);
 
   const [data, setData] = useState({
+    userId: userId || 0,
+    addressId: 0,
     pickupDate: "",
     pickupTime: "",
-    addressId: "",
-    address: user?.userAddress || [],
-    city: "",
-    landmark: "",
-    selectedWasteTypes: [],
-    wasteQuantities: {},
-    wasteTypes: [],
-    estimatedWeight: "",
-    phoneNumber: user?.mobileNumber || "",
-    userId: user?.userId || "",
-    email: user?.emailId || "",
-    firstName: user?.firstName || "",
-    lastName: user?.userId || "",
+    mobileNumber: userDetails?.mobileNumber || "",
+    approxWeight: 0,   // corresponds to estimatedWeight
+    items: [],         // array of selected waste items
+    firstName: userDetails?.firstName || "",
+    lastName: userDetails?.lastName || "",
+    email: userDetails?.email || "",
+
+    // For UI convenience
+    selectedWasteTypes: [], // e.g., ["Plastic", "Glass"]
+    wasteQuantities: {},    // e.g., { Plastic: 2, Glass: 3 }
   });
+
+
 
   const [currentStep, setCurrentStep] = useState(1);
 
-  const handleNextStep = () => {
-    setCurrentStep((prevStep) => prevStep + 1);
-  };
-
-  const handleBackStep = () => {
-    setCurrentStep((prevStep) => prevStep - 1);
-  };
+  const handleNextStep = () => setCurrentStep((prev) => prev + 1);
+  const handleBackStep = () => setCurrentStep((prev) => prev - 1);
 
   const handleSubmit = async () => {
+    console.log("hereeeeeeeeeeee")
     const requestPayload = {
-      pickupDate: formatToYMDWithSlashes(data.pickupDate),
-      approxPickupTime: data.pickupTime,
       userId: data.userId,
-      userAddressId: parseInt(data.addressId),
-      phoneNumber: data.phoneNumber,
-      nearLandMark: data.landmark,
-      weight: data.estimatedWeight,
-      trashType: data.wasteQuantities,
+      addressId: parseInt(data.addressId),
+      pickupDate: formatToYMDWithSlashes(data.pickupDate),
+      pickupTime: data.pickupTime,
+      mobileNumber: data.phoneNumber,
+      approxWeight: parseFloat(data.estimatedWeight || 0),
+      items: Object.entries(data.wasteQuantities).map(([wasteType, quantity], index) => ({
+        itemId: index + 1,
+        type: wasteType,
+        displayName: wasteType, // could be a prettier label if you want
+        quantity: quantity,
+        unit: "KG",
+      })),
     };
 
     try {
-      const response = await trashRequestApi(requestPayload);
-      // console.log("API Response:", response);
-
+      await trashRequestApi(requestPayload);
       setShowSuccess(true);
       setCurrentStep(1);
-      console.log("after reset");
     } catch (error) {
       console.error("Submission error:", error);
-      // Optionally show error snackbar here
+      // Optionally show error toast/snackbar
     }
   };
 
@@ -70,7 +76,7 @@ const SchedulePickupForm = () => {
     <>
       {!showSuccess ? (
         <div className="min-h-[180] flex justify-center items-center px-1 py-8">
-          <div className="w-full max-w-md md:max-w-2xl bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl p-4 md:p-10 transition-all duration-300">
+          <div className="w-full max-w-md md:max-w-3xl bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl p-4 md:p-10 transition-all duration-300">
             <h2 className="text-3xl font-extrabold text-center text-gray-800 mb-6">
               Schedule a Pickup
             </h2>
@@ -100,7 +106,7 @@ const SchedulePickupForm = () => {
           </div>
         </div>
       ) : (
-        <TrashrequestSubmitSuccessPopUp startTimer={true} from={"app"}/>
+        <TrashrequestSubmitSuccessPopUp startTimer={true} from="app" />
       )}
     </>
   );

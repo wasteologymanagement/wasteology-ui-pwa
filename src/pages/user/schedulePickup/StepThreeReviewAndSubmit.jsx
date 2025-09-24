@@ -3,9 +3,11 @@ import { formatToDMY } from "../../../utils/dateFormatter";
 
 const StepThreeReviewAndSubmit = ({ data, onSubmit, onBack }) => {
   const handleSubmit = () => {
-    // alert("Pickup request submitted!");
     onSubmit();
   };
+
+  // Compute total weight
+  const totalWeight = data.items.reduce((sum, item) => sum + (item.quantity || 0), 0);
 
   return (
     <div className="w-full max-w-3xl mx-auto px-4 py-6 space-y-8">
@@ -33,7 +35,7 @@ const StepThreeReviewAndSubmit = ({ data, onSubmit, onBack }) => {
           </div>
           <div>
             <p className="text-gray-500">Phone Number</p>
-            <p className="font-medium">+91 {data.phoneNumber}</p>
+            <p className="font-medium">+91 {data.mobileNumber}</p>
           </div>
         </div>
       </section>
@@ -74,28 +76,20 @@ const StepThreeReviewAndSubmit = ({ data, onSubmit, onBack }) => {
         <h3 className="text-lg font-semibold text-gray-700 mb-3 border-b pb-1">
           Waste Items Summary
         </h3>
-        <ul className="list-disc list-inside space-y-1 text-md text-gray-800">
-          {data.selectedWasteTypes.map((wasteId) => {
-            const wasteType = data.wasteTypes?.find(
-              (w) => w.value === wasteId
-            );
-            const label = wasteType?.label || wasteId;
-            const quantity = data.wasteQuantities[wasteId] || 0;
-            const unit = [
-              "e-waste",
-              "WASHING_MACHINE",
-              "AC",
-              "REFRIGERATOR",
-            ].includes(wasteId)
-              ? "pc"
-              : "kg";
-            return (
-              <li key={wasteId}>
-                {label}: {quantity} {unit}
+        {data.items.length > 0 ? (
+          <ul className="list-disc list-inside space-y-1 text-md text-gray-800">
+            {data.items.map((item) => (
+              <li key={item.itemId}>
+                {item.displayName}: {item.quantity} {item.unit || "KG"}
               </li>
-            );
-          })}
-        </ul>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-gray-500">No items selected.</p>
+        )}
+        <p className="mt-2 font-medium">
+          Total Estimated Weight: {totalWeight} KG
+        </p>
       </section>
 
       {/* Buttons */}

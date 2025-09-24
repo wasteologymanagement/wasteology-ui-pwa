@@ -1,138 +1,137 @@
-import React, { useEffect, useState } from "react";
-import { fetchScrapTypes } from "../../../service/apiServices/scrapTypeService";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchActiveTrashMaterialsThunk } from "../../../store/slice/trashMaterialSlice";
+import { Box, CircularProgress } from "@mui/material";
 
 const StepTwoWasteSelection = ({ data, setData, onNext, onBack }) => {
-  const [wasteTypes, setWasteTypes] = useState([]);
-  const [loading, setLoading] = useState(true); // loader state
+  const dispatch = useDispatch();
+  const { list, status } = useSelector((state) => state.trashMaterial);
 
   useEffect(() => {
-    const loadScrapTypes = async () => {
-      try {
-        const types = await fetchScrapTypes();
-        setWasteTypes(types);
-      } catch (error) {
-        console.error("Failed to load scrap types:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadScrapTypes();
-  }, []);
-
-  const handleQuantityChange = (wasteId, action) => {
-    const updatedQuantities = { ...data.wasteQuantities };
-    if (action === "increment") {
-      updatedQuantities[wasteId] = (updatedQuantities[wasteId] || 0) + 1;
-    } else if (action === "decrement" && updatedQuantities[wasteId] > 0) {
-      updatedQuantities[wasteId] -= 1;
+    if (!list || list.length === 0) {
+      dispatch(fetchActiveTrashMaterialsThunk());
     }
-    setData({ ...data, wasteQuantities: updatedQuantities });
-  };
+  }, [dispatch, list]);
 
-  const handleWasteChange = (wasteId, isChecked) => {
-    const updatedWasteTypes = isChecked
-      ? [...data.selectedWasteTypes, wasteId]
-      : data.selectedWasteTypes.filter((id) => id !== wasteId);
-
+  // Update both wasteQuantities and items for payload
+  const handleQuantityChange = (material, action) => {
     const updatedQuantities = { ...data.wasteQuantities };
+    const currentQty = updatedQuantities[material.id]?.quantity || 0;
 
-    if (!isChecked) {
-      updatedQuantities[wasteId] = 0; // Reset quantity if unchecked
-    }
+    let newQty = currentQty;
+    if (action === "increment") newQty = currentQty + 1;
+    else if (action === "decrement" && currentQty > 0) newQty = currentQty - 1;
+
+    if (newQty === 0) delete updatedQuantities[material.id];
+    else updatedQuantities[material.id] = { ...material, quantity: newQty };
+
+    // Update items array for payload
+    const updatedItems = Object.entries(updatedQuantities).map(([id, item], index) => ({
+      itemId: index + 1,
+      type: item.displayName,
+      displayName: item.displayName,
+      quantity: item.quantity,
+      unit: item.unit,
+    }));
 
     setData({
       ...data,
-      selectedWasteTypes: updatedWasteTypes,
       wasteQuantities: updatedQuantities,
+      items: updatedItems,
     });
   };
 
-  // 👇 Show loader while data is being fetched
-  if (loading) {
+  const handleNext = () => {
+    if (data.items.length === 0) {
+      alert("Please select at least one waste material.");
+      return;
+    }
+    onNext();
+  };
+
+  if (status === "loading" && !list.length) {
     return (
-      <div className="flex justify-center items-center h-40">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500" />
-      </div>
+      <Box display="flex" justifyContent="center" alignItems="center" height="40vh">
+        <CircularProgress />
+      </Box>
     );
   }
 
-  // Disable "Next" button if no waste types are selected
-  const isNextDisabled =
-    data.selectedWasteTypes.length === 0 ||
-    data.selectedWasteTypes.some(
-      (wasteId) =>
-        !data.wasteQuantities[wasteId] || data.wasteQuantities[wasteId] < 1
-    );
+  // Group materials by type
+  const grouped = list?.reduce((acc, item) => {
+    if (!acc[item.type]) acc[item.type] = [];
+    acc[item.type].push(item);
+    return acc;
+  }, {});
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold mb-4">Select Waste Types</h3>
+    <div className="space-y-6 px-4 sm:px-6">
+      <h3 className="text-xl font-bold text-gray-800 text-center">
+        Select Waste Materials
+      </h3>
 
-      <div className="space-y-2">
-        {wasteTypes.map((waste) => (
-          <div key={waste.value} className="flex items-center justify-between">
-            <label className="text-md text-gray-700 flex items-center">
-              {/* Custom styled checkbox */}
-              <input
-                type="checkbox"
-                checked={data.selectedWasteTypes.includes(waste.value)}
-                onChange={(e) =>
-                  handleWasteChange(waste.value, e.target.checked)
-                }
-                className="mr-2 peer h-4 w-4 border-gray-300 rounded-md focus:ring-0 checked:bg-green-600" // Tailwind custom styling
-              />
-              {waste.label}
-            </label>
+      {status !== "loading" &&
+        grouped &&
+        Object.entries(grouped).map(([type, materials]) => (
+          <div key={type} className="space-y-2">
+            <h4 className="text-md font-semibold text-green-700 mb-1">{type}</h4>
+            <div className="flex overflow-x-auto space-x-4 py-2">
+              {materials.map((material) => {
+                const qty = data.wasteQuantities[material.id]?.quantity || 0;
+                return (
+                  <div
+                    key={material.id}
+                    className="flex-shrink-0 w-32 p-3 bg-white border rounded-xl shadow-sm hover:shadow-md flex flex-col items-center transition"
+                  >
+                    {material.imageUrl && (
+                      <img
+                        src={material.imageUrl}
+                        alt={material.displayName}
+                        className="w-12 h-12 object-contain mb-2"
+                      />
+                    )}
+                    <span className="text-sm font-medium text-center mb-1">
+                      {material.displayName}
+                    </span>
+                    <span className="text-xs text-gray-400 mb-2">{material.unit}</span>
 
-            {data.selectedWasteTypes.includes(waste.value) && (
-              <div className="flex items-center">
-                <button
-                  onClick={() => handleQuantityChange(waste.value, "decrement")}
-                  className="px-2 py-1 text-xs bg-gray-200 rounded-full mr-2"
-                >
-                  -
-                </button>
-                <span className="px-2">
-                  {data.wasteQuantities[waste.value] || 0}
-                </span>
-                <button
-                  onClick={() => handleQuantityChange(waste.value, "increment")}
-                  className="px-2 py-1 text-xs bg-gray-200 rounded-full"
-                >
-                  +
-                </button>
-              </div>
-            )}
+                    <div className="flex items-center justify-center space-x-2 mt-1">
+                      <button
+                        onClick={() => handleQuantityChange(material, "decrement")}
+                        className="px-2 py-1 bg-gray-200 rounded-full hover:bg-gray-300 transition text-sm"
+                      >
+                        -
+                      </button>
+                      <span className="px-2 text-sm font-medium">{qty}</span>
+                      <button
+                        onClick={() => handleQuantityChange(material, "increment")}
+                        className="px-2 py-1 bg-gray-200 rounded-full hover:bg-gray-300 transition text-sm"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         ))}
-      </div>
 
-      <div className="flex justify-between mt-6">
+      {/* Navigation */}
+      <div className="flex justify-between mt-4">
         <button
           onClick={onBack}
-          className="px-4 py-2 bg-gray-300 rounded-xl text-sm text-gray-700"
+          className="px-6 py-2 rounded-xl bg-gray-300 hover:bg-gray-400 transition text-sm"
         >
           Back
         </button>
-
         <button
-          onClick={onNext}
-          className={`px-4 py-2 rounded-xl text-sm ${
-            isNextDisabled
-              ? "bg-gray-300 text-gray-700"
-              : "bg-green-600 text-white"
-          }`}
-          disabled={isNextDisabled} // Disable the "Next" button
+          onClick={handleNext}
+          className="px-6 py-2 rounded-xl bg-green-600 text-white hover:bg-green-700 transition text-sm"
         >
           Next
         </button>
       </div>
-      {/* 🟡 Note for user */}
-      <p className="text-sm text-yellow-600 mt-2">
-        ⚠️ Please note: For each selected waste type, you must choose a quantity
-        greater than 0.
-      </p>
     </div>
   );
 };
