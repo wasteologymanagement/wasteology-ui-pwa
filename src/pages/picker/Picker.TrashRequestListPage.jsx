@@ -1,20 +1,70 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Button, Chip, TextField, IconButton, InputAdornment, Stack } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Button,
+  Chip,
+  TextField,
+  InputAdornment,
+  Stack,
+} from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { Search as SearchIcon, Refresh as RefreshIcon } from "@mui/icons-material";
 import { getAllTrashRequestForPickers } from "../../service/apiServices/trashCollectionService";
 import { format } from "date-fns";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import {
+    selectUser,
+} from "../../store/slice/userSlice";
 
 const TrashPickerRequestListPage = () => {
+
+  // get logged-in userId from auth slice
+  const authState = useSelector((state) => state.auth);
+  const userId = authState?.userId;
+  const userName = authState?.name;
+
+  // get user slice state
+  const userDetails = useSelector(selectUser);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [rows, setRows] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshLoading, setRefreshLoading] = useState(false);
-  const user = useSelector((state) => state.user.user);
   const navigate = useNavigate();
+
+  // ✅ Status → Color mapping
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "ASSIGNED":
+        return "warning";
+      case "CLIENT_PICKED":
+        return "success";
+      case "PENDING":
+        return "default";
+      case "CANCELLED":
+        return "error";
+      default:
+        return "info";
+    }
+  };
+
+  // ✅ Convert API response → UI row shape
+  const transformResponse = (data) => {
+    return data.map((item) => ({
+      trashRequestId: item.requestId,
+      customerName: item.userName,
+      userMobileNumber: item.mobileNumber,
+      userAddress: `${item.address.addressLine1}, ${item.address.street}, ${item.address.city}`,
+      pickupDate: item.pickupDate,
+      pickupTime: item.pickupTime,
+      approxWeight: item.approxWeight,
+      status: item.status,
+      trashItems: item.trashItems,
+    }));
+  };
 
   const columns = [
     { field: "customerName", headerName: "Name", flex: 1 },
@@ -26,7 +76,7 @@ const TrashPickerRequestListPage = () => {
       renderCell: (params) => (
         <Chip
           label={params.value}
-          color={params.value === "CLIENT_PICKED" ? "success" : "warning"}
+          color={getStatusColor(params.value)}
           className="capitalize"
         />
       ),
@@ -36,7 +86,9 @@ const TrashPickerRequestListPage = () => {
       headerName: "Address",
       flex: 2,
       renderCell: (params) => (
-        <Typography className="whitespace-normal">{params.value}</Typography>
+        <Typography className="whitespace-normal text-gray-700">
+          {params.value}
+        </Typography>
       ),
     },
     {
@@ -44,18 +96,20 @@ const TrashPickerRequestListPage = () => {
       headerName: "Pickup Date",
       flex: 1,
       valueGetter: (params) => {
-        const date = params;
-        console.log("date :", params)
-        if (!date) return "";
-        try {
-          return format(new Date(date), "dd/MM/yyyy");
-        } catch (error) {
-          console.error("Invalid date format:", error);
-          return "";
-        }
+        // console.log("date paream : ", params)
+        if (!params) return "";
+        return format(new Date(params), "dd/MM/yyyy");
       },
     },
-    { field: "pickupTime", headerName: "Pickup Time", flex: 1 },
+    {
+      field: "pickupTime",
+      headerName: "Pickup Time",
+      flex: 1,
+      valueGetter: (params) => {
+        if (!params) return "";
+        return params.slice(0, 5); // show HH:mm only
+      },
+    },
     {
       field: "action",
       headerName: "Action",
@@ -65,9 +119,9 @@ const TrashPickerRequestListPage = () => {
           variant="contained"
           size="small"
           onClick={() =>
-            navigate(`/app/picker/trash-details/${params.row.trashRequestId}`,{
-                state: { rowData: params.row }
-              })
+            navigate(`/app/picker/trash-details/${params.row.trashRequestId}`, {
+              state: { rowData: params.row },
+            })
           }
         >
           View Details
@@ -79,8 +133,9 @@ const TrashPickerRequestListPage = () => {
   const fetchData = async () => {
     try {
       setRefreshLoading(true);
-      const response = await getAllTrashRequestForPickers(user.userId);
-      setRows(response);
+      const response = await getAllTrashRequestForPickers('userId', userId);
+      console.log("response .....:", response.data)
+      setRows(transformResponse(response.data));
       setError(null);
     } catch (err) {
       setError("Failed to fetch data");
@@ -92,7 +147,7 @@ const TrashPickerRequestListPage = () => {
 
   useEffect(() => {
     fetchData();
-  }, [user.userId]);
+  }, ['userId', userId]);
 
   const filteredRows = rows.filter((row) =>
     Object.values(row).some((value) =>
@@ -102,21 +157,22 @@ const TrashPickerRequestListPage = () => {
 
   return (
     <Box className="p-4 mb-10">
-      <Stack 
-        direction={{ xs: 'column', sm: 'row' }} 
-        spacing={2} 
-        alignItems={{ xs: 'stretch', sm: 'center' }}
+      {/* Header Section */}
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
+        spacing={2}
+        alignItems={{ xs: "stretch", sm: "center" }}
         justifyContent="space-between"
         className="mb-4"
       >
-        <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-          Trash Requests
+        <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+          Assigned Trash Requests
         </Typography>
-        
-        <Stack 
-          direction={{ xs: 'column', sm: 'row' }} 
-          spacing={2} 
-          sx={{ width: { xs: '100%', sm: 'auto' } }}
+
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={2}
+          sx={{ width: { xs: "100%", sm: "auto" } }}
         >
           <TextField
             size="small"
@@ -132,29 +188,30 @@ const TrashPickerRequestListPage = () => {
             }}
             className="bg-white rounded-lg"
             sx={{
-              width: { xs: '100%', sm: 240 },
-              '& .MuiOutlinedInput-root': {
-                borderRadius: '0.5rem',
+              width: { xs: "100%", sm: 240 },
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "0.5rem",
               },
             }}
           />
-          
+
           <Button
             variant="outlined"
             startIcon={<RefreshIcon />}
             onClick={fetchData}
             disabled={refreshLoading}
             fullWidth
-            sx={{ 
-              minWidth: { xs: '100%', sm: 'auto' },
-              height: { xs: 40, sm: 36 }
+            sx={{
+              minWidth: { xs: "100%", sm: "auto" },
+              height: { xs: 40, sm: 36 },
             }}
           >
-            {refreshLoading ? 'Refreshing...' : 'Refresh'}
+            {refreshLoading ? "Refreshing..." : "Refresh"}
           </Button>
         </Stack>
       </Stack>
 
+      {/* Desktop DataGrid */}
       {error ? (
         <Typography color="error">{error}</Typography>
       ) : (
@@ -170,34 +227,51 @@ const TrashPickerRequestListPage = () => {
         </div>
       )}
 
+      {/* Mobile Card View */}
       <div className="lg:hidden space-y-4">
         {filteredRows.map((row) => (
           <Box
             key={row.trashRequestId}
             className="bg-white rounded-xl shadow-lg p-4 space-y-2 hover:shadow-xl transition"
           >
-            <Typography className="font-bold text-lg text-gray-800">
-              {row.customerName}
-            </Typography>
-            <Typography className="text-gray-600">{row.userAddress}</Typography>
             <div className="flex items-center justify-between">
+              <Typography className="font-bold text-lg text-gray-800">
+                {row.customerName}
+              </Typography>
               <Chip
                 label={row.status}
-                color={row.status === "CLIENT_PICKED" ? "success" : "warning"}
-                className="capitalize"
-              />
-              <Button
-                variant="outlined"
+                color={getStatusColor(row.status)}
                 size="small"
-                onClick={() =>
-                    navigate(`/app/picker/trash-details/${row.trashRequestId}`,{
-                        state: { rowData: row }
-                      })
-                }
-              >
-                Details
-              </Button>
+              />
             </div>
+
+            <Typography className="text-gray-600">{row.userAddress}</Typography>
+
+            <Typography className="text-gray-700 text-sm">
+              Pickup: {format(new Date(row.pickupDate), "dd/MM/yyyy")} at{" "}
+              {row.pickupTime?.slice(0, 5)}
+            </Typography>
+
+            <Typography className="text-gray-700 text-sm">
+              Phone: {row.userMobileNumber}
+            </Typography>
+
+            <Typography className="text-gray-700 text-sm">
+              Weight: {row.approxWeight} Kg
+            </Typography>
+
+            <Button
+              variant="outlined"
+              size="small"
+              fullWidth
+              onClick={() =>
+                navigate(`/app/picker/trash-details/${row.trashRequestId}`, {
+                  state: { rowData: row },
+                })
+              }
+            >
+              View Details
+            </Button>
           </Box>
         ))}
       </div>

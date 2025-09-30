@@ -5,13 +5,25 @@ import {
 } from "react-icons/fa";
 import { getPickerProfilebyPickerUserId } from '../../service/apiServices/trashPickersService';
 import { useSelector } from "react-redux";
+import {
+    selectUser,
+} from "../../store/slice/userSlice";
 
 const PickerDashboard = () => {
 
-  const userState = useSelector((state) => state.user || state.auth);
-  const userId = userState?.user?.userDetails?.userId;
 
-  console.log("user state : ", userState);
+  // get logged-in userId from auth slice
+  const authState = useSelector((state) => state.auth);
+  const userId = authState?.userId;
+  const userName = authState?.name;
+
+  // get user slice state
+  const userDetails = useSelector(selectUser);
+
+  // console.log("user state : ", userDetails);
+  // console.log("userId : ", userId);
+  // console.log("userName : ", userName);
+  // console.log("authState : ", authState);
 
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);

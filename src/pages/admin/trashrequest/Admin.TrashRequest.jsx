@@ -45,6 +45,7 @@ import ConfirmationDialog from "../../../components/ConfirmationDialog";
 import AssignPickerDialog from './AssignPickerDialog';
 import { getAllActiveTrashPickers } from '../../../service/apiServices/trashPickersService';
 import { AssignmentInd } from '@mui/icons-material';
+import { assignedTrashRequest } from '../../../service/apiServices/pickupRequestService';
 
 const TABS = [
     { label: "All", value: "ALL" },
@@ -146,14 +147,20 @@ const AdminTrashRequest = () => {
         try {
             setAssignLoading(true);
 
+            // console.log("selectedPicker : ", selectedPicker);
+            // console.log("selectedRequest : ", selectedRequest);
+
             // Example: Replace with your actual API call
-            // await assignPickerToRequest(selectedRequest.requestId, selectedPicker);
+            let response = await assignedTrashRequest(selectedRequest.requestId, selectedPicker)
+            // console.log("response : ", response);
 
             // Success handling
             setOpenAssignDialog(false);
             setSelectedPicker("");
             setSelectedRequest(null);
-            // Optionally refresh data
+
+            // Refresh the data after assignment
+            await dispatch(getAllTrashRequests());
             console.log("assigned....")
             showMessage("Assigned successfully", "success");
         } catch (err) {

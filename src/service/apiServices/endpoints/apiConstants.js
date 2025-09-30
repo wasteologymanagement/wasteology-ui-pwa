@@ -101,6 +101,9 @@ export const ADMIN_API = {
 
   //Get activate soft delete trash picker
   GET_ACTIVATE_TRASH_PICKER: (id) => `${API_BASE_URL}/admin/trash-pickers/${id}/revoke`,
+
+  //Assigned tarsh request to picker
+  ASSIGNED_REQUEST: `${API_BASE_URL}/admin/assign-picker`,
 };
 
 
@@ -128,6 +131,9 @@ export const PICKERS_API = {
   PICKER_PROFILE: (id) => `${API_BASE_URL}/picker/${id}`,
 
   //fetch picker pofile by user id
-  PICKER_PROFILE_BY_USERID: (id) => `${API_BASE_URL}/picker/user/${id}`
+  PICKER_PROFILE_BY_USERID: (id) => `${API_BASE_URL}/picker/user/${id}`,
+
+  //fetch all assigned request by pickerid 
+  ASSIGNED_REQUESTS_BY_PICKERID_OR_USERID: (type,id) => `${API_BASE_URL}/admin/assigned-requests?${type}=${id}`
 }
 

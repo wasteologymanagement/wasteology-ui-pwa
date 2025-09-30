@@ -1,5 +1,6 @@
 import axiosInstance from '../axiosInstance';
 import { TRASH_REQUEST_ENDPOINTS } from './endpoints/apiEndpoints';
+import { PICKERS_API } from './endpoints/apiConstants';
 
 export const getAllTrashRequestDetails = async (userId) => {
   try {
@@ -29,19 +30,19 @@ export const getAllTrashPickersDetails = async () => {
   }
 };
 
-export const getAllTrashRequestForPickers = async (userId) => {
-  try {
-    // console.log("Fetching scheduled pickup details for userId:", userId);
-    const response = await axiosInstance.get(
-      `${TRASH_REQUEST_ENDPOINTS.GET_TRASH_REQUEST_FOR_TRASH_PICKERS}?trashPickerId=${userId}`
-    );
-    // console.log("response.data for pickup : ", response.data)
-    return response.data;
-  } catch (error) {
-    console.log('API call failed : ', error);
-    throw error;
-  }
-}
+// export const getAllTrashRequestForPickers = async (userId) => {
+//   try {
+//     // console.log("Fetching scheduled pickup details for userId:", userId);
+//     const response = await axiosInstance.get(
+//       `${TRASH_REQUEST_ENDPOINTS.GET_TRASH_REQUEST_FOR_TRASH_PICKERS}?trashPickerId=${userId}`
+//     );
+//     // console.log("response.data for pickup : ", response.data)
+//     return response.data;
+//   } catch (error) {
+//     console.log('API call failed : ', error);
+//     throw error;
+//   }
+// }
 
 export const assignTrashRequestWithTrashPicker = async (data) => {
   try {
@@ -105,3 +106,18 @@ export const TrashDetailsAfterPickup = async (trashRequestId) => {
     throw error;
   }
 };
+
+
+
+
+export const getAllTrashRequestForPickers = async (type, id) => {
+  try {
+    // console.log("Fetching scheduled pickup details for userId:", userId);
+    const response = await axiosInstance.get(PICKERS_API.ASSIGNED_REQUESTS_BY_PICKERID_OR_USERID(type, id));
+    // console.log("response.data for pickup : ", response.data)
+    return response.data;
+  } catch (error) {
+    console.log('API call failed : ', error);
+    throw error;
+  }
+}
