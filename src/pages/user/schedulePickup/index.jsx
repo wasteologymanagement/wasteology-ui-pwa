@@ -45,20 +45,21 @@ const SchedulePickupForm = () => {
   const handleBackStep = () => setCurrentStep((prev) => prev - 1);
 
   const handleSubmit = async () => {
-    console.log("hereeeeeeeeeeee")
+    // console.log("hereeeeeeeeeeee")
+    // console.log("data....:", data)
     const requestPayload = {
       userId: data.userId,
       addressId: parseInt(data.addressId),
-      pickupDate: formatToYMDWithSlashes(data.pickupDate),
-      pickupTime: data.pickupTime,
-      mobileNumber: data.phoneNumber,
+      pickupDate: data.pickupDate,
+      pickupTime: to24HourFormat(data.pickupTime),
+      mobileNumber: data.mobileNumber,
       approxWeight: parseFloat(data.estimatedWeight || 0),
-      items: Object.entries(data.wasteQuantities).map(([wasteType, quantity], index) => ({
-        itemId: index + 1,
-        type: wasteType,
-        displayName: wasteType, // could be a prettier label if you want
-        quantity: quantity,
-        unit: "KG",
+      items: Object.entries(data.wasteQuantities).map(([_, obj], index) => ({
+        itemId: obj.id ?? index,       // use id if present, else fallback to index
+        type: obj.type,
+        displayName: obj.displayName,
+        quantity: obj.quantity,
+        unit: obj.unit || "KG",        // fallback to KG if unit is missing
       })),
     };
 
@@ -71,6 +72,34 @@ const SchedulePickupForm = () => {
       // Optionally show error toast/snackbar
     }
   };
+
+  // 12-hour AM/PM -> 24-hour HH:mm:ss
+  function to24HourFormat(timeStr) {
+    if (!timeStr) return "N/A";
+
+    const [time, modifier] = timeStr.split(" "); // ["11:30", "AM"]
+    let [hours, minutes] = time.split(":").map(Number);
+
+    if (modifier === "PM" && hours < 12) hours += 12;
+    if (modifier === "AM" && hours === 12) hours = 0;
+
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00`;
+  }
+
+  // 24-hour HH:mm:ss -> 12-hour hh:mm AM/PM
+  function to12HourFormat(timeStr) {
+    if (!timeStr) return "N/A";
+
+    const [hoursStr, minutesStr] = timeStr.split(":");
+    let hours = Number(hoursStr);
+    const minutes = minutesStr;
+    const modifier = hours >= 12 ? "PM" : "AM";
+
+    hours = hours % 12 || 12; // convert 0 -> 12 for midnight, 13->1, etc.
+
+    return `${String(hours).padStart(2, "0")}:${minutes} ${modifier}`;
+  }
+
 
   return (
     <>
@@ -110,6 +139,7 @@ const SchedulePickupForm = () => {
       )}
     </>
   );
-};
+}
+
 
 export default SchedulePickupForm;

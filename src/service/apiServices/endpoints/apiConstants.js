@@ -112,6 +112,12 @@ export const TRASH_REQUEST_API = {
 
   // Fetch all request
   ALL_REQUESTS: `${API_BASE_URL}/user/all-pickup-requests`,
+
+  // Fetch all request by user Id
+  REQUEST_BY_USER_ID: (userId) => `${API_BASE_URL}/user/pickup-requests/${userId}`,
+
+  // Fetch all request by request Id
+  REQUEST_BY_REQUEST_ID: (requestId) => `${API_BASE_URL}/user/pickup-requests/request?requestId=${requestId}`
   
 };
 

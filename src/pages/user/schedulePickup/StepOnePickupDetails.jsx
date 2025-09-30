@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import AddAddressModal from "../../../components/AddEditAddressModal";
 import { useSelector, useDispatch } from "react-redux";
 import { selectUser, addAddress } from "../../../store/slice/userSlice";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const StepOnePickupDetails = ({ data, setData, onNext }) => {
   const dispatch = useDispatch();
@@ -14,6 +15,8 @@ const StepOnePickupDetails = ({ data, setData, onNext }) => {
 
   const [error, setError] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleAddAddress = (newAddr) => {
     dispatch(addAddress({ userId, address: newAddr }));
@@ -125,7 +128,8 @@ const StepOnePickupDetails = ({ data, setData, onNext }) => {
             onChange={(e) => {
               const value = e.target.value;
               if (value === "add_new") {
-                setModalOpen(true);
+                // setModalOpen(true);
+                navigate('/app/user/profile')
                 return;
               }
 
@@ -190,7 +194,7 @@ const StepOnePickupDetails = ({ data, setData, onNext }) => {
       </div>
 
       {/* City */}
-      <div>
+      {/* <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           City
         </label>
@@ -203,10 +207,10 @@ const StepOnePickupDetails = ({ data, setData, onNext }) => {
           <option value="Delhi">Delhi</option>
           <option value="Gurugram">Gurugram</option>
         </select>
-      </div>
+      </div> */}
 
       {/* Landmark */}
-      <div>
+      {/* <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Landmark
         </label>
@@ -217,25 +221,24 @@ const StepOnePickupDetails = ({ data, setData, onNext }) => {
           onChange={(e) => setData({ ...data, landmark: e.target.value })}
           className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm"
         />
-      </div>
+      </div> */}
 
       {/* Estimated Weight */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Estimated Weight
+          Estimated Weight (kg)
         </label>
-        <select
+        <input
+          type="number"
           value={data.approxWeight || ""}
-          onChange={(e) => setData({ ...data, approxWeight: e.target.value })}
+          onChange={(e) =>
+            setData({ ...data, approxWeight: parseFloat(e.target.value) })
+          }
+          step="0.1"
+          min="0"
+          placeholder="Enter weight in kg"
           className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm"
-        >
-          <option value="">Select Estimated Weight</option>
-          <option value="less_than_20">less_than_20 kg</option>
-          <option value="21-50">21-50 kg</option>
-          <option value="51-100">51-100 kg</option>
-          <option value="101-700">101-700 kg</option>
-          <option value="more_than_700">more_than_700 kg</option>
-        </select>
+        />
       </div>
 
       {/* Next Button */}
@@ -247,12 +250,12 @@ const StepOnePickupDetails = ({ data, setData, onNext }) => {
       </button>
 
       {/* Add Address Modal */}
-      <AddAddressModal
+      {/* <AddAddressModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         onAdd={handleAddAddress}
         mode="add"
-      />
+      /> */}
     </div>
   );
 };

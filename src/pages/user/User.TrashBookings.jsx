@@ -18,15 +18,20 @@ import {
 import { DataGrid } from "@mui/x-data-grid";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { getScheduledPickupDetails } from "../../service/apiServices/mySchedulePickupsService";
+import { useSelector } from "react-redux";
+import { selectUser } from "../../store/slice/userSlice";
+import { getScheduledPickupDetails } from "../../service/apiServices/pickupRequestService";
 
 const TrashBookings = () => {
+  const authState = useSelector((state) => state.auth);
+  const userId = authState?.userId;
+
+  const userDetails = useSelector(selectUser);
+
   const isMobile = useMediaQuery("(max-width:768px)");
   const [tab, setTab] = useState("CREATED");
   const [bookings, setBookings] = useState([]);
   const [filteredBookings, setFilteredBookings] = useState([]);
-  const user = useSelector((state) => state.user.user);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedBooking, setSelectedBooking] = useState(null);
@@ -44,24 +49,31 @@ const TrashBookings = () => {
   };
 
   useEffect(() => {
-    if (user?.userId) {
+    if (userId) {
       const fetchData = async () => {
         setLoading(true);
         try {
-          const response = await getScheduledPickupDetails(user.userId);
+          const response = await getScheduledPickupDetails(userId);
+          // console.log("Booking response:", response);
+
           const data = response.map((booking) => ({
-            id: booking.trashRequestId,
-            date: booking.date,
-            time: booking.pickupTime || "N/A",
+            id: booking.requestId,
+            date: booking.pickupDate,
+            time: booking.pickupTime ? booking.pickupTime.substring(0, 5) : "N/A",
             status: booking.status,
-            address: `${booking.address.address}, ${booking.address.city}, ${booking.address.pinCode}`,
-            wasteType: booking.type.join(", "),
-            weight: booking.weight || "N/A",
+            address: booking.address
+              ? `${booking.address.addressLine1}, ${booking.address.addressLine2}, ${booking.address.street}, ${booking.address.city}, ${booking.address.state}, ${booking.address.country}, ${booking.address.zip}`
+              : "N/A",
+            wasteType: booking.items && booking.items.length
+              ? booking.items.map((item) => item.type).join(", ")
+              : "N/A",
+            weight: booking.approxWeight || "N/A",
           }));
+
           setBookings(data);
           setLoading(false);
         } catch (err) {
-          console.log("error:", err);
+          console.log("Error fetching bookings:", err);
           setError("Failed to fetch bookings");
           setLoading(false);
         }
@@ -69,7 +81,7 @@ const TrashBookings = () => {
 
       fetchData();
     }
-  }, [user?.userId]);
+  }, [userId]);
 
   useEffect(() => {
     let filtered = [];
@@ -88,10 +100,13 @@ const TrashBookings = () => {
   }, [tab, bookings]);
 
   const getStatusChip = (status) => {
-    const color = status === "COMPLETED" ? "success" : "warning";
-    return (
-      <Chip label={status} color={color} size="small" variant="outlined" />
-    );
+    const color =
+      status === "COMPLETED"
+        ? "success"
+        : status === "CANCELLED"
+        ? "error"
+        : "warning";
+    return <Chip label={status} color={color} size="small" variant="outlined" />;
   };
 
   const columns = [
@@ -149,8 +164,7 @@ const TrashBookings = () => {
               textTransform: "none",
               fontWeight: "bold",
               width: isMobile ? "100%" : "auto",
-              borderRadius: 10, // use MUI's border radius scale
-              gap: 1, // spacing between icon and text
+              borderRadius: 10,
             }}
           >
             Book Now
@@ -175,7 +189,7 @@ const TrashBookings = () => {
         <Tab label="Cancelled" value="CANCELLED" />
       </Tabs>
 
-      {/* Loading */}
+      {/* Loading / Error / Content */}
       {loading ? (
         <Box className="flex justify-center items-center h-40">
           <CircularProgress />
@@ -224,12 +238,10 @@ const TrashBookings = () => {
                     <span className="font-medium">Time:</span> {booking.time}
                   </Typography>
                   <Typography className="text-gray-700 text-sm">
-                    <span className="font-medium">Address:</span>{" "}
-                    {booking.address}
+                    <span className="font-medium">Address:</span> {booking.address}
                   </Typography>
                   <Typography className="text-gray-700 text-sm">
-                    <span className="font-medium">Waste:</span>{" "}
-                    {booking.wasteType} ({booking.weight})
+                    <span className="font-medium">Waste:</span> {booking.wasteType} ({booking.weight} kg)
                   </Typography>
                 </CardContent>
               </Card>
@@ -267,7 +279,7 @@ const TrashBookings = () => {
               <strong>Waste Type:</strong> {selectedBooking.wasteType}
             </Typography>
             <Typography>
-              <strong>Weight:</strong> {selectedBooking.weight}
+              <strong>Weight:</strong> {selectedBooking.weight} kg
             </Typography>
           </DialogContent>
           <DialogActions>
