@@ -18,8 +18,9 @@ const DashboardFooter = () => {
   const navigate = useNavigate();
   const [value, setValue] = React.useState(0);
 
-  const role = useSelector((state) => state.user.role);
-  // const role = "user";
+  // const role = useSelector((state) => state.user.role);
+  const authState = useSelector((state) => state.auth);
+  const role = authState?.role;
 
   const menuItems = {
     USER: [

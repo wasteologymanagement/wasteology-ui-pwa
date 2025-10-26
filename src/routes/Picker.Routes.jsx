@@ -6,6 +6,8 @@ import TrashRequestDetailPage from "../pages/picker/Picker.TrashRequestDetailPag
 import TrashPickerProfilePage from "../pages/picker/Picker.ProfilePage";
 import ComingSoonPage from "../pages/comingSoon/ComingSoonPage";
 import { ROLES } from "../utils/roleConstants";
+import PickerItemsPage from "../pages/picker/Picker.PickerItemCheckPage";
+import TestPage from "../pages/picker/TestPage";
 
 const ClientRoutes = ({ isAuthenticated, role }) => {
   return (
@@ -15,6 +17,12 @@ const ClientRoutes = ({ isAuthenticated, role }) => {
         <Route path="trash-list" element={<TrashPickerRequestListPage />} />
         <Route path="trash-details/:trashRequestId" element={<TrashRequestDetailPage />} />
         <Route path="profile" element={<TrashPickerProfilePage />} />
+        <Route path="profile2" element={<PickerItemsPage />} />
+
+        {/* ✅ New route */}
+        <Route path="items" element={<PickerItemsPage />} />
+        {/* or if you want test route: */}
+        {/* <Route path="test" element={<TestPage />} /> */}
         {/* <Route path="profile" element={<ComingSoonPage />} /> */}
       </Route>
     </Routes>

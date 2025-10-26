@@ -60,28 +60,36 @@ const
 
     const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-      const fetchTrashTypes = async () => {
-        try {
-          const response = await getAllTrashMaterials();
-          const data = response;
-          // setTrashData(data); 
-          console.log('trashData : ', data);
-          // setLoading(false);
-        } catch (err) {
-          setError('Failed to load request details');
-          // setLoading(false);
-        }
-      };
+    // useEffect(() => {
+    //   const fetchTrashTypes = async () => {
+    //     try {
+    //       const response = await getAllTrashMaterials();
+    //       const data = response;
+    //       // setTrashData(data); 
+    //       console.log('trashData : ', data);
+    //       // setLoading(false);
+    //     } catch (err) {
+    //       setError('Failed to load request details');
+    //       // setLoading(false);
+    //     }
+    //   };
 
-      fetchTrashTypes();
-    }, []);
+    //   fetchTrashTypes();
+    // }, []);
 
     const InfoRow = ({ label, value }) => (
       <Typography variant="body2" sx={{ mb: 1 }}>
         <strong>{label}:</strong> {value || "N/A"}
       </Typography>
     );
+
+    const handlePickupInProgress = () => {
+      navigate(`/app/picker/items`, { state: { trashData: rowData } })
+    }
+
+    const handleCancelPickup = () => {
+
+    }
 
     const MobileTableCard = ({ data, title }) => (
       <Box sx={{ mt: 2 }}>
@@ -174,7 +182,6 @@ const
           padding: { xs: '8px 4px', sm: '10px' }
         }
       }}>
-        {console.log("data ..... : ", data)}
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ backgroundColor: '#f0f0f0' }}>
@@ -272,6 +279,35 @@ const
 
           </CardContent>
         </Card>
+
+        {/* Submit button only if not picked */}
+              {rowData?.status !== "COMPLETED" && (
+                <Box
+                  sx={{
+                    mt: 3,
+                    display: "flex",
+                    gap: 2,
+                    flexDirection: { xs: "column", sm: "row" },
+                  }}
+                >
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    fullWidth={isMobile}
+                    onClick={handlePickupInProgress}
+                  >
+                    Start Pickup
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    fullWidth={isMobile}
+                    onClick={handleCancelPickup}
+                  >
+                    Cancel Pickup
+                  </Button>
+                </Box>
+              )}
 
       </Box>
     )

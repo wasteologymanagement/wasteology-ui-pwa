@@ -98,3 +98,14 @@ export const getPickerProfilebyPickerUserId = async (id) => {
     return response.data;
 } 
 
+
+export const completeTrashPickup = async (trashPickupData) => {
+    try {
+        const response = await axiosInstance.post(PICKERS_API.SUBMIT_TRASH_PICKUP, trashPickupData);
+        return response.data;
+    } catch (error) {
+        console.error("Error registering trash picker:", error);
+        throw error.response?.data || error.message;
+    }
+}
+

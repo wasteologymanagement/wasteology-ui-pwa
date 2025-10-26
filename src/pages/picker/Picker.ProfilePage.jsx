@@ -12,7 +12,7 @@ const TrashPickerProfilePage = () => {
   const authState = useSelector((state) => state.auth);
   const userId = authState?.userId;
 
-  console.log("user state : ", authState);
+  // console.log("user state : ", authState);
   
   const [profile, setProfile] = useState(null);
   const [open, setOpen] = useState(false);
