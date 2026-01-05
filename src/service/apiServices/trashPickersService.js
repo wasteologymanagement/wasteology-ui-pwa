@@ -109,3 +109,13 @@ export const completeTrashPickup = async (trashPickupData) => {
     }
 }
 
+export const addNewItems = async (newItemsData) => {
+    try {
+        const response = await axiosInstance.post(PICKERS_API.ADD_NEW_ITEMS, newItemsData);
+        return response.data;
+    } catch (error) {
+         console.error("Error registering trash picker:", error);
+        throw error.response?.data || error.message;
+    }
+}
+

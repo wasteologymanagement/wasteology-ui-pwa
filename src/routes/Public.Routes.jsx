@@ -17,7 +17,7 @@ const PublicRoutes = () => {
       <Route path="/login/admin" element={<AdminLoginPage />} />
       <Route path="/login/test" element={<TestPage />} />
       <Route path="/profile2" element={<PickerItemsPage />} />
-        <Route path="/test" element={<TestPage />} />
+      <Route path="/test" element={<TestPage />} />
     </Routes>
   );
 };

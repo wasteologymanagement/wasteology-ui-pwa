@@ -37,6 +37,7 @@ import {
     AccessTime,
     Phone,
     Scale,
+    Add as AddIcon,
     Assignment
 } from '@mui/icons-material';
 import { ActionsColumn } from "../../../components/ActionsColumn";
@@ -240,19 +241,24 @@ const AdminTrashRequest = () => {
             headerAlign: "center",
             sortable: false,
             filterable: false,
-            renderCell: (params) => (
-                <Button
-                    variant="contained"
-                    size="small"
-                    color="primary"
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        handleOpenAssignDialog(params.row)
-                    }}
-                >
-                    Assign Picker
-                </Button>
-            ),
+            renderCell: (params) => {
+                const isNotRequested = params.row.status !== "REQUESTED";
+
+                return (
+                    <Button
+                        variant="contained"
+                        size="small"
+                        color="primary"
+                        disabled={isNotRequested}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenAssignDialog(params.row);
+                        }}
+                    >
+                        Assign Picker
+                    </Button>
+                );
+            },
         }
     ];
 
@@ -352,6 +358,15 @@ const AdminTrashRequest = () => {
                         sx={{ minWidth: { xs: "100%", sm: 120 } }}
                     >
                         {loading ? "Refreshing..." : "Refresh"}
+                    </Button>
+                    <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={() => {console.log("open dialog")}}
+                        disabled={loading}
+                        sx={{ minWidth: { xs: "100%", sm: 150 }, borderRadius: 2 }}
+                    >
+                        Add Trash Request
                     </Button>
                 </Stack>
             </Stack>

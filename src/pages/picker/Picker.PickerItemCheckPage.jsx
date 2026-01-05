@@ -15,58 +15,66 @@ import {
 import { Add, Delete, Edit } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getAllTrashMaterials } from "../../service/apiServices/scrapRatesService";
-import { completeTrashPickup } from "../../service/apiServices/trashPickersService";
-
-const units = ["KG", "Piece", "Gram", "Litre"];
+import { completeTrashPickup, addNewItems } from "../../service/apiServices/trashPickersService";
 
 const PickerItemsPage = () => {
   const location = useLocation();
   const trashRequestDetails = location.state?.trashData;
-const navigate = useNavigate();
+  const navigate = useNavigate();
+  const isMobile = useMediaQuery("(max-width:768px)");
+
   const [items, setItems] = useState([]);
-  const [availableItems, setAvailableItems] = useState([]);
+  const [materialsByType, setMaterialsByType] = useState({});
+  const [types, setTypes] = useState([]);
+
   const [newItem, setNewItem] = useState({
     type: "",
     displayName: "",
-    quantity: "",
     unit: "",
     amount: "",
+    quantity: "",
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const isMobile = useMediaQuery("(max-width:768px)");
 
-  // ✅ Fetch trash materials from API
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // =========================
+  // Fetch & group materials
+  // =========================
   useEffect(() => {
     const fetchTrashTypes = async () => {
       try {
         const response = await getAllTrashMaterials();
-        const activeItems = response.data
-          .filter((item) => item.active)
-          .map((item) => ({
-            type: item.type,
-            displayName: item.displayName,
-            pricePerUnit: item.pricePerUnit,
-            unit: item.unit,
-          }));
-        setAvailableItems(activeItems);
-        console.log("Available Items:", activeItems);
+
+        const activeItems = response.data.filter(item => item.active);
+
+        const grouped = activeItems.reduce((acc, item) => {
+          if (!acc[item.type]) acc[item.type] = [];
+          acc[item.type].push(item);
+          return acc;
+        }, {});
+
+        setMaterialsByType(grouped);
+        setTypes(Object.keys(grouped));
       } catch (err) {
         console.error("Failed to fetch trash materials:", err);
       }
     };
+
     fetchTrashTypes();
   }, []);
 
-  // ✅ Populate existing request items (if editing)
+  // =========================
+  // Populate existing items
+  // =========================
   useEffect(() => {
     if (trashRequestDetails?.trashItems) {
       const mappedItems = trashRequestDetails.trashItems.map((item, index) => ({
         id: item.trashItemId || index + 1,
-        displayName: item.displayName || "",
-        type: item.type || "",
-        quantity: item.quantity || 0,
-        unit: item.unit || "",
-        amount: item.pricePerUnit || 0,
+        displayName: item.displayName,
+        type: item.type,
+        quantity: item.quantity,
+        unit: item.unit,
+        amount: item.pricePerUnit,
         checked: false,
         isEditing: false,
       }));
@@ -74,93 +82,143 @@ const navigate = useNavigate();
     }
   }, [trashRequestDetails]);
 
-  // ✅ Handle when "Type" changes in the new item form
-  const handleTypeChange = (selectedType) => {
-    const selected = availableItems.find((i) => i.type === selectedType);
-    if (selected) {
-      setNewItem({
-        ...newItem,
-        type: selected.type,
-        displayName: selected.displayName,
-        unit: selected.unit,
-        amount: selected.pricePerUnit,
-      });
-    } else {
-      setNewItem({
-        ...newItem,
-        type: selectedType,
-        displayName: "",
-        unit: "",
-        amount: "",
-      });
-    }
+  // =========================
+  // Handlers
+  // =========================
+  const handleTypeChange = (type) => {
+    setNewItem({
+      type,
+      displayName: "",
+      unit: "",
+      amount: "",
+      quantity: "",
+    });
   };
 
-  const handleAddItem = () => {
-    if (!newItem.type || !newItem.quantity) return;
+  const handleDisplayNameChange = (displayName) => {
+    const selected = materialsByType[newItem.type]?.find(
+      item => item.displayName === displayName
+    );
 
-    setItems((prev) => [
+    if (!selected) return;
+
+    setNewItem(prev => ({
       ...prev,
-      { ...newItem, id: Date.now(), checked: false, isEditing: false },
-    ]);
-    setNewItem({ type: "", displayName: "", quantity: "", unit: "", amount: "" });
+      displayName: selected.displayName,
+      unit: selected.unit,
+      amount: selected.pricePerUnit,
+    }));
   };
 
-  const handleDelete = (id) => setItems((prev) => prev.filter((i) => i.id !== id));
-  const handleCheckboxChange = (id) =>
-    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, checked: !i.checked } : i)));
-  const handleEditToggle = (id, toggle) =>
-    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, isEditing: toggle } : i)));
-  const handleEditChange = (id, field, value) =>
-    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, [field]: value } : i)));
+  const handleAddItem = async () => {
+  if (!newItem.type || !newItem.displayName || !newItem.quantity) {
+    alert("Please fill all required fields");
+    return;
+  }
 
-  const isSubmitEnabled = items.some((i) => i.checked);
+  const payload = {
+    requestId: trashRequestDetails.trashRequestId,
+    userId: trashRequestDetails.userId,
+    pickerId: trashRequestDetails.pickerId,
+    type: newItem.type,
+    displayName: newItem.displayName,
+    unit: newItem.unit,
+    pricePerUnit: newItem.amount,
+    quantity: Number(newItem.quantity),
+  };
+
+  try {
+    setIsSubmitting(true);
+
+    console.log("payload for new item : ", payload)
+
+    const response = await addNewItems(payload);
+
+    const savedItem = response.data;
+
+    // Add to UI only after DB success
+    setItems(prev => [
+      ...prev,
+      {
+        id: savedItem.trashItemId, // from backend
+        displayName: savedItem.displayName,
+        type: savedItem.type,
+        unit: savedItem.unit,
+        amount: savedItem.pricePerUnit,
+        quantity: savedItem.quantity,
+        checked: false,
+        isEditing: false,
+      },
+    ]);
+
+    setNewItem({
+      type: "",
+      displayName: "",
+      unit: "",
+      amount: "",
+      quantity: "",
+    });
+
+  } catch (error) {
+    console.error(error);
+    alert("Failed to add item");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+
+  const handleDelete = (id) =>
+    setItems(prev => prev.filter(i => i.id !== id));
+
+  const handleCheckboxChange = (id) =>
+    setItems(prev =>
+      prev.map(i => i.id === id ? { ...i, checked: !i.checked } : i)
+    );
+
+  const handleEditToggle = (id, toggle) =>
+    setItems(prev =>
+      prev.map(i => i.id === id ? { ...i, isEditing: toggle } : i)
+    );
+
+  const handleEditChange = (id, field, value) =>
+    setItems(prev =>
+      prev.map(i => i.id === id ? { ...i, [field]: value } : i)
+    );
+
+  const isSubmitEnabled = items.some(i => i.checked);
 
   const grandTotal = items
-    .filter((i) => i.checked)
-    .reduce((sum, i) => sum + (Number(i.quantity) || 0) * (Number(i.amount) || 0), 0);
+    .filter(i => i.checked)
+    .reduce(
+      (sum, i) => sum + Number(i.quantity || 0) * Number(i.amount || 0),
+      0
+    );
 
+  // =========================
+  // Submit
+  // =========================
   const handleSubmit = async () => {
-    const selectedItems = items.filter((i) => i.checked); 
-    if (selectedItems.length === 0) { 
-      alert("Please select at least one item before submitting."); 
-      return; 
-    } 
-    
-    console.log("Submitting items:", selectedItems);
+    const selectedItems = items.filter(i => i.checked);
+    if (!selectedItems.length) return alert("Select at least one item");
 
-   // Build the payload 
     const payload = {
       assignmentId: trashRequestDetails.assignmentId,
       requestId: trashRequestDetails.trashRequestId,
       userId: trashRequestDetails.userId,
       pickerId: trashRequestDetails.pickerId,
-      // pickupDate: trashRequestDetails.pickupDate,
-      // pickupTime: trashRequestDetails.pickupTime,
-      // approxWeight: trashRequestDetails.approxWeight,
-      // status: "COMPLETED",
       totalAmount: grandTotal,
-      // items: selectedItems.map((i) => ({
-      //   trashItemId: i.id,
-      //   displayName: i.displayName,
-      //   quantity: Number(i.quantity),
-      //   unit: i.unit,
-      //   pricePerUnit: Number(i.amount),
-      //   totalPrice: Number(i.quantity) * Number(i.amount),
-      // })),
     };
 
     try {
       setIsSubmitting(true);
-      console.log("Submitting payload:", payload);
-      const response = await completeTrashPickup(payload);
-      console.log("✅ Request submitted successfully:", response);
-      alert("Request submitted successfully!");
-      navigate(-1); 
-      // Go back to previous page or dashboard
-    } catch (error) {
-      console.error("❌ Error submitting request:", error);
-      toast.error("Failed to submit request!");
+      await completeTrashPickup(payload);
+      console.log("submit payload : ", payload);
+      alert("Pickup completed successfully");
+      navigate(`/app/picker/submission-success`);
+    } catch (e) {
+      console.error(e);
+      alert("Failed to submit pickup");
     } finally {
       setIsSubmitting(false);
     }
@@ -168,176 +226,149 @@ const navigate = useNavigate();
 
   return (
     <Box className="p-4 pb-16">
-      <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
+      <Typography variant="h5" fontWeight="bold" mb={3}>
         Pickup Items
       </Typography>
 
-      {/* Item Cards */}
+      {/* ================= Item Cards ================= */}
       <Stack spacing={2} mb={4}>
-        {items.map((item) => {
-          const totalAmount = (Number(item.quantity) || 0) * (Number(item.amount) || 0);
+        {items.map(item => {
+          const total = item.quantity * item.amount;
           return (
-            <Card
-              key={item.id}
-              sx={{
-                p: 2,
-                borderRadius: 2,
-                boxShadow: 3,
-                backgroundColor: item.isEditing ? "#e3f2fd" : "#fff",
-              }}
-            >
-              <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1}>
-                <Checkbox checked={item.checked} onChange={() => handleCheckboxChange(item.id)} />
-                <Box>
+            <Card key={item.id} sx={{ p: 2, borderRadius: 2, boxShadow: 3 }}>
+              <Stack direction="row" justifyContent="space-between">
+                <Checkbox
+                  checked={item.checked}
+                  onChange={() => handleCheckboxChange(item.id)}
+                />
+                <Box flex={1}>
                   <Typography fontWeight="bold">{item.displayName}</Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Type: {item.type}
-                  </Typography>
+                  <Typography variant="body2">Type: {item.type}</Typography>
                 </Box>
-                {!item.isEditing && (
-                  <Stack direction="row" spacing={1}>
-                    <IconButton onClick={() => handleEditToggle(item.id, true)}>
-                      <Edit color="primary" />
-                    </IconButton>
-                    <IconButton onClick={() => handleDelete(item.id)}>
-                      <Delete color="error" />
-                    </IconButton>
-                  </Stack>
-                )}
+                <IconButton onClick={() => handleEditToggle(item.id, true)}>
+                  <Edit />
+                </IconButton>
+                <IconButton onClick={() => handleDelete(item.id)}>
+                  <Delete color="error" />
+                </IconButton>
               </Stack>
 
-              <Divider sx={{ mb: 1 }} />
+              <Divider sx={{ my: 1 }} />
 
               {item.isEditing ? (
-                <Stack spacing={1}>
-                  <TextField
-                    label="Quantity"
-                    type="number"
-                    value={item.quantity}
-                    onChange={(e) => handleEditChange(item.id, "quantity", e.target.value)}
-                    fullWidth
-                    size="small"
-                  />
-                  <Stack direction="row" spacing={1} justifyContent="flex-end" mt={1}>
-                    <Button
-                      variant="contained"
-                      color="success"
-                      onClick={() => handleEditToggle(item.id, false)}
-                    >
-                      Save
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      onClick={() => handleEditToggle(item.id, false)}
-                    >
-                      Cancel
-                    </Button>
-                  </Stack>
-                </Stack>
+                <TextField
+                  type="number"
+                  label="Quantity"
+                  value={item.quantity}
+                  onChange={(e) =>
+                    handleEditChange(item.id, "quantity", e.target.value)
+                  }
+                  size="small"
+                />
               ) : (
-                <Stack spacing={0.5}>
-                  <Typography variant="body2">Quantity: {item.quantity}</Typography>
-                  <Typography variant="body2">Unit: {item.unit}</Typography>
-                  <Typography variant="body2">₹/Unit: {item.amount}</Typography>
-                  <Typography fontWeight="bold">Total: ₹{totalAmount.toFixed(2)}</Typography>
-                </Stack>
+                <>
+                  <Typography>Qty: {item.quantity}</Typography>
+                  <Typography>₹/Unit: {item.amount}</Typography>
+                  <Typography fontWeight="bold">
+                    Total: ₹{total.toFixed(2)}
+                  </Typography>
+                </>
               )}
             </Card>
           );
         })}
       </Stack>
 
-      {/* Add New Item */}
-      <Card sx={{ p: 2, mb: 4, boxShadow: 3, borderRadius: 2 }}>
+      {/* ================= Add Item ================= */}
+      <Card sx={{ p: 2, boxShadow: 3 }}>
         <Typography variant="h6" mb={2}>
           Add New Item
         </Typography>
 
         <Stack direction={isMobile ? "column" : "row"} spacing={2}>
-          {/* Type dropdown */}
           <TextField
             select
             label="Type"
             value={newItem.type}
             onChange={(e) => handleTypeChange(e.target.value)}
             size="small"
-            sx={{ width: isMobile ? "100%" : "250px" }}
+             sx={{
+              width: 250,          // px
+              // or: width: "300px"
+            }}
           >
-            {availableItems.map((item) => (
-              <MenuItem key={item.type} value={item.type}>
-                {item.type}
+            {types.map(type => (
+              <MenuItem key={type} value={type}>{type}</MenuItem>
+            ))}
+          </TextField>
+
+          <TextField
+            select
+            label="Display Name"
+            value={newItem.displayName}
+            onChange={(e) => handleDisplayNameChange(e.target.value)}
+            disabled={!newItem.type}
+            size="small"
+            sx={{
+              width: 250,          // px
+              // or: width: "300px"
+            }}
+          >
+            {(materialsByType[newItem.type] || []).map(item => (
+              <MenuItem key={item.id} value={item.displayName}>
+                {item.displayName}
               </MenuItem>
             ))}
           </TextField>
 
-          {/* Auto-filled fields */}
-          <TextField
-            label="Display Name"
-            value={newItem.displayName}
-            size="small"
-            sx={{ width: isMobile ? "100%" : "300px" }}
-            disabled
-          />
-          <TextField
-            label="Unit"
-            value={newItem.unit}
-            size="small"
-            sx={{ width: isMobile ? "100%" : "150px" }}
-            disabled
-          />
-          <TextField
-            label="₹/Unit"
-            value={newItem.amount}
-            size="small"
-            sx={{ width: isMobile ? "100%" : "150px" }}
-            disabled
-          />
 
-          {/* Quantity input */}
+          <TextField label="Unit" value={newItem.unit} disabled size="small"  sx={{
+              width: 100,          // px
+              // or: width: "300px"
+            }} />
+          <TextField label="₹/Unit" value={newItem.amount} disabled size="small"  sx={{
+              width: 150,          // px
+              // or: width: "300px"
+            }} />
+
           <TextField
             label="Quantity"
             type="number"
             value={newItem.quantity}
-            onChange={(e) => setNewItem({ ...newItem, quantity: e.target.value })}
+            onChange={(e) =>
+              setNewItem(prev => ({ ...prev, quantity: e.target.value }))
+            }
             size="small"
-            sx={{ width: isMobile ? "100%" : "150px" }}
           />
 
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={handleAddItem}
-            sx={{ alignSelf: isMobile ? "flex-start" : "center" }}
-          >
+          <Button variant="contained" startIcon={<Add />} onClick={handleAddItem}>
             Add
           </Button>
         </Stack>
       </Card>
 
-      {/* Grand Total + Submit */}
+      {/* ================= Footer ================= */}
       <Box
         sx={{
           position: isMobile ? "fixed" : "static",
-          bottom: isMobile ? 0 : "auto",
+          bottom: 0,
           left: 0,
           right: 0,
-          backgroundColor: "#fff",
           p: 2,
+          background: "#fff",
           boxShadow: isMobile ? "0 -2px 10px rgba(0,0,0,0.1)" : "none",
-          borderTop: isMobile ? "1px solid #eee" : "none",
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "center",
-          zIndex: 1000,
         }}
       >
-        <Typography fontWeight="bold">Grand Total: ₹{grandTotal.toFixed(2)}</Typography>
+        <Typography fontWeight="bold">
+          Grand Total: ₹{grandTotal.toFixed(2)}
+        </Typography>
         <Button
           variant="contained"
           color="success"
+          disabled={!isSubmitEnabled || isSubmitting}
           onClick={handleSubmit}
-          disabled={!isSubmitEnabled}
         >
           Submit
         </Button>

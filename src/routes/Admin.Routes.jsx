@@ -1,12 +1,11 @@
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./Protected.Routes";
 import AdminDashboard from "../pages/admin/dashboard/Admin.Dashboard";
-import TestingPage from "../pages/testingScreen/TestingPage";
 import AdminTrashRequest from "../pages/admin/trashrequest/Admin.TrashRequest";
 import AdminPricing from "../pages/admin/pricing/Admin.Pricing";
 import AdminTrashPicker from "../pages/admin/trashPicker/Admin.TrashPicker";
 import AdminTrashRequestDetails from "../pages/admin/trashrequest/Admin.TrashRequestDetails";
-import AdminTrashPickerClientList from "../pages/admin/Admin.TrashPickerClientList";
+// import AdminTrashPickerClientList from "../pages/admin/Admin.TrashPickerClientList";
 import { ROLES } from "../utils/roleConstants";
 import AdminTrashPickerDetails from "../pages/admin/trashPicker/Admin.TrashPickerDetails";
 
@@ -36,12 +35,12 @@ const AdminRoutes = ({ isAuthenticated, role }) => {
         <Route
           path="trash-request/details/:requestId"
           element={<AdminTrashRequestDetails />}
-        />{" "}
-        <Route
+        />
+        {/* <Route
           path="trash-pickers/:pickerId"
           element={<AdminTrashPickerClientList />}
         />
-        <Route path="settings" element={<TestingPage />} />
+        <Route path="settings" element={<TestingPage />} /> */}
       </Route>
     </Routes>
   );

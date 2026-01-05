@@ -8,9 +8,10 @@ import { useSelector } from "react-redux";
 import {
     selectUser,
 } from "../../store/slice/userSlice";
+import { useNavigate } from "react-router-dom";
 
 const PickerDashboard = () => {
-
+const navigate = useNavigate();
 
   // get logged-in userId from auth slice
   const authState = useSelector((state) => state.auth);
@@ -79,7 +80,8 @@ const PickerDashboard = () => {
             </p>
           </div>
         </div>
-        <button className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition">
+        <button className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
+        onClick={() => navigate(`/app/picker/submission-success`)} >
           View Details
         </button>
       </div>

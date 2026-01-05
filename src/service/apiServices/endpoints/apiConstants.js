@@ -1,6 +1,6 @@
 // 📦 Base URL for all API endpoints
-// const API_BASE_URL = "http://localhost:9090/api/v1";
-const API_BASE_URL = "http://185.199.53.13:9090/api/v1";
+const API_BASE_URL = "http://localhost:9090/api/v1";
+// const API_BASE_URL = "http://185.199.53.13:9090/api/v1";
 
 // 🔐 Auth API Endpoints
 export const AUTH_API = {
@@ -138,5 +138,8 @@ export const PICKERS_API = {
 
   // Submit trash pickup item after verify
   SUBMIT_TRASH_PICKUP: `${API_BASE_URL}/picker/submit`,
+
+  //Add new items at pickup
+  ADD_NEW_ITEMS: `${API_BASE_URL}/picker/add-new-items`,
 }
 

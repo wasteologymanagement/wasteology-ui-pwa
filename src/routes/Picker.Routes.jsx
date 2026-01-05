@@ -4,10 +4,11 @@ import ClientDashboard from "../pages/picker/Picker.Dashboard";
 import TrashPickerRequestListPage from "../pages/picker/Picker.TrashRequestListPage";
 import TrashRequestDetailPage from "../pages/picker/Picker.TrashRequestDetailPage";
 import TrashPickerProfilePage from "../pages/picker/Picker.ProfilePage";
-import ComingSoonPage from "../pages/comingSoon/ComingSoonPage";
+// import ComingSoonPage from "../pages/comingSoon/ComingSoonPage";
 import { ROLES } from "../utils/roleConstants";
 import PickerItemsPage from "../pages/picker/Picker.PickerItemCheckPage";
 import TestPage from "../pages/picker/TestPage";
+import SubmissionSuccessPage from "../pages/picker/Picker.SubmissionSuccessPage";
 
 const ClientRoutes = ({ isAuthenticated, role }) => {
   return (
@@ -21,8 +22,9 @@ const ClientRoutes = ({ isAuthenticated, role }) => {
 
         {/* ✅ New route */}
         <Route path="items" element={<PickerItemsPage />} />
+        <Route path="/submission-success" element={<SubmissionSuccessPage />}/>
         {/* or if you want test route: */}
-        {/* <Route path="test" element={<TestPage />} /> */}
+        <Route path="test" element={<TestPage />} />
         {/* <Route path="profile" element={<ComingSoonPage />} /> */}
       </Route>
     </Routes>

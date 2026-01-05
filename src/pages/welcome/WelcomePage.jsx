@@ -38,7 +38,7 @@ const WelcomePage = () => {
             onClick={() => navigate("/login/admin")}
             className="w-full py-3 px-4 bg-blue-600 text-white rounded-xl font-semibold text-sm sm:text-base hover:bg-blue-700 transition focus-visible:outline focus-visible:ring-2 focus-visible:ring-blue-400"
           >
-            Login as Admin
+            Login as Admin or Picker
           </button>
           <button
             onClick={() => navigate("/login/customer")}

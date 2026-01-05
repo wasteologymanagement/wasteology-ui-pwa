@@ -59,7 +59,7 @@ const initialFormState = {
         city: "",
         state: "",
         zip: "",
-        country: "",
+        country: "India",
     },
     assignedZone: "",
     areaCovered: [],
@@ -320,12 +320,14 @@ const AdminTrashPicker = () => {
             sortable: false,
             filterable: false,
             renderCell: (params) => (
-                <ActionsColumn
-                    params={params}
-                    handleSoftDelete={handleSoftDelete}
-                    handlePermanentDelete={handlePermanentDelete}
-                    handleActivate={handleActivate}
-                />
+                 <div onClick={(e) => e.stopPropagation()}>
+                     <ActionsColumn
+                         params={params}
+                         handleSoftDelete={handleSoftDelete}
+                         handlePermanentDelete={handlePermanentDelete}
+                         handleActivate={handleActivate}
+                     />
+                 </div>
             ),
         }
 
